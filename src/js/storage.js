@@ -16,6 +16,8 @@ const defaultState = {
     preferredView: 'gallery',
     photoComments: {},
     favoritePhotoIds: [],
+    albumOrder: [],
+    photoOrder: {},
   },
 };
 
@@ -32,6 +34,13 @@ function sanitizeGallery(value) {
     photoComments,
     favoritePhotoIds: Array.isArray(gallery.favoritePhotoIds)
       ? [...new Set(gallery.favoritePhotoIds.filter((id) => typeof id === 'string'))] : [],
+    albumOrder: Array.isArray(gallery.albumOrder)
+      ? [...new Set(gallery.albumOrder.filter((id) => typeof id === 'string'))] : [],
+    photoOrder: gallery.photoOrder && typeof gallery.photoOrder === 'object'
+      ? Object.fromEntries(Object.entries(gallery.photoOrder).map(([albumId, ids]) => [
+        albumId,
+        Array.isArray(ids) ? [...new Set(ids.filter((id) => typeof id === 'string'))] : [],
+      ])) : {},
   };
 }
 

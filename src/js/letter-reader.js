@@ -32,10 +32,9 @@ export function openLetter(giftId) {
     title: 'A letter for you 💌',
     modalClass: 'letter-reader-modal',
     bodyHTML: `
-      <div class="letter-opening" aria-hidden="true"><span>💌</span></div>
-      <article class="letter-paper" aria-label="Birthday letter">
-        <div class="letter-tape letter-tape--left" aria-hidden="true"></div>
-        <div class="letter-tape letter-tape--right" aria-hidden="true"></div>
+      <div class="envelope-stage">
+        <div class="envelope-back" aria-hidden="true"></div>
+        <article class="letter-paper" aria-label="Birthday letter">
         <header class="letter-sender">
           <div class="sender-polaroid"><img class="letter-sender-photo" alt=""></div>
           <div><span class="letter-from-label">A letter from</span><strong class="letter-sender-name"></strong></div>
@@ -55,7 +54,10 @@ export function openLetter(giftId) {
           </label>
           <span class="letter-music-status" role="status"></span>
         </section>
-      </article>
+        </article>
+        <div class="envelope-front" aria-hidden="true"></div>
+        <button type="button" class="envelope-lift" aria-label="Remove the envelope">Remove envelope <span aria-hidden="true">↑</span></button>
+      </div>
       <div class="selection-toolbar" hidden><button type="button">💬 React</button></div>
       <section class="reaction-composer" hidden aria-label="Reaction editor">
         <h3>Leave a little note 💌</h3>
@@ -76,6 +78,32 @@ export function openLetter(giftId) {
 
   if (!modal) return false;
   const body = modal.querySelector('.letter-body');
+  const envelope = modal.querySelector('.envelope-stage');
+  const liftButton = modal.querySelector('.envelope-lift');
+  let envelopeTimer = null;
+  const setEnvelopeRemoved = (removed) => {
+    if (!envelope) return;
+    window.clearTimeout(envelopeTimer);
+    envelope.classList.remove('is-envelope-returning');
+    envelope.classList.toggle('is-envelope-removed', removed);
+    if (!removed) {
+      void envelope.offsetWidth;
+      envelope.classList.add('is-envelope-returning');
+      envelopeTimer = window.setTimeout(() => envelope.classList.remove('is-envelope-returning'), 900);
+    }
+    if (liftButton) {
+      liftButton.innerHTML = removed
+        ? 'Bring envelope back <span aria-hidden="true">↓</span>'
+        : 'Remove envelope <span aria-hidden="true">↑</span>';
+      liftButton.setAttribute('aria-label', removed ? 'Bring the envelope back' : 'Remove the envelope');
+      liftButton.setAttribute('aria-pressed', String(removed));
+    }
+    if (removed) setTimeout(() => modal.querySelector('.letter-heading')?.focus?.(), 900);
+  };
+  liftButton?.addEventListener('click', () => setEnvelopeRemoved(!envelope?.classList.contains('is-envelope-removed')));
+  envelope?.addEventListener('click', (event) => {
+    if (!envelope.classList.contains('is-envelope-removed') && !event.target.closest('button, input, textarea, label')) setEnvelopeRemoved(true);
+  });
   const composer = modal.querySelector('.reaction-composer');
   const toolbar = modal.querySelector('.selection-toolbar');
   const input = modal.querySelector('.reaction-input');

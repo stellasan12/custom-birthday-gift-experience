@@ -71,7 +71,7 @@
     border-radius: 16px;
   }
 
-  .letter-reader-modal > .modal-body {
+  .letter-reader-modal>.modal-body {
     padding: 8px;
   }
 
@@ -80,19 +80,57 @@
     padding: 34px 18px 22px;
   }
 
-  .letter-sender { gap: 14px; }
-  .sender-polaroid { width: 88px; padding: 6px 6px 17px; }
-  .letter-sender-photo { width: 76px; }
-  .letter-heading { margin-bottom: 22px; }
-  .receiver-reaction { margin-left: 10px; }
-  .receiver-reaction-actions { opacity: 1; }
+  .envelope-stage {
+    padding: 20px 4px 105px;
+    min-height: 70svh;
+  }
+
+  .envelope-stage .letter-paper {
+    transform: translateY(27%);
+  }
+
+  .envelope-front {
+    left: 0;
+    right: 0;
+    height: 30%;
+  }
+
+  .letter-sender {
+    gap: 14px;
+  }
+
+  .sender-polaroid {
+    width: 88px;
+    padding: 6px 6px 17px;
+  }
+
+  .letter-sender-photo {
+    width: 76px;
+  }
+
+  .letter-heading {
+    margin-bottom: 22px;
+  }
+
+  .receiver-reaction {
+    margin-left: 10px;
+  }
+
+  .receiver-reaction-actions {
+    opacity: 1;
+  }
 
   .letter-music {
     flex-wrap: wrap;
   }
 
-  .letter-music-label { flex: 1; }
-  .letter-music-status { width: 100%; }
+  .letter-music-label {
+    flex: 1;
+  }
+
+  .letter-music-status {
+    width: 100%;
+  }
 
   .selection-toolbar {
     right: auto;
@@ -100,7 +138,9 @@
     transform: translateX(-50%);
   }
 
-  .reaction-composer { padding: 14px; }
+  .reaction-composer {
+    padding: 14px;
+  }
 }
 
 /* ── Tablets (≥ 768px) ── */

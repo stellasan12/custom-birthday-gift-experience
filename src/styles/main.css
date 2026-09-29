@@ -678,6 +678,33 @@ svg {
 
 .nav-link-btn.locked {
   opacity: 0.85;
+  position: relative;
+}
+
+.nav-link-btn.locked::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  width: max-content;
+  max-width: min(240px, 75vw);
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--color-text-heading);
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.nav-link-btn.locked:hover::after,
+.nav-link-btn.locked:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .nav-link-btn.unlocked {
@@ -1030,6 +1057,11 @@ svg {
   cursor: pointer;
   user-select: none;
   transition: transform var(--transition-fast);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
 }
 
 .gift-character-card:hover {
@@ -1174,4 +1206,10 @@ svg {
   border-radius: var(--radius-pill);
   font-size: 0.95rem;
   box-shadow: var(--shadow-medium);
+}
+
+.homepage.exiting {
+  opacity: 0;
+  transform: scale(0.985);
+  transition: opacity 280ms ease, transform 280ms ease;
 }

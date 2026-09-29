@@ -2,7 +2,7 @@
 
 A cute, warm, and whimsical interactive birthday gift website — built as a polished single-page experience with Vite + Vanilla JavaScript.
 
-## ✨ Features (Increment 1)
+## ✨ Features (Increments 1–2)
 
 - **Intro slideshow** — cinematic opening with crossfade transitions and Ken Burns effect
 - **Optional video intro** — just change one config value
@@ -12,6 +12,10 @@ A cute, warm, and whimsical interactive birthday gift website — built as a pol
 - **Soft pastel design system** — CSS custom properties, Quicksand + Pacifico fonts
 - **Fully responsive** — mobile (360px) → tablet (768px) → desktop (1440px+)
 - **Accessible** — semantic HTML, keyboard navigation, focus states, reduced-motion support
+- **Explore Room** — scrapbook-style room with configurable interactive stickers
+- **Gift reveal and carousel** — touch, mouse, button, and keyboard-friendly horizontal browsing
+- **Persistent progress** — safe local storage for reveals, viewed gifts, and dynamic unlocks
+- **Reusable modals** — focus trapping, Escape/backdrop close, and responsive media handling
 
 ## 🛠 Tech Stack
 
@@ -52,7 +56,10 @@ Opens a local dev server with hot module replacement.
     ├── js/
     │   ├── app.js              # Main app controller
     │   ├── audio.js            # Audio manager
-    │   └── effects.js          # Confetti + visual effects
+    │   ├── effects.js          # Confetti + visual effects
+    │   ├── explore.js          # Explore Room and gift carousel
+    │   ├── modal.js            # Reusable accessible modal manager
+    │   └── storage.js          # Safe progress persistence
     └── styles/
         ├── main.css            # Design system + components
         ├── animations.css      # Keyframes + reduced-motion
@@ -73,8 +80,8 @@ Output goes to `dist/`.
 
 ## 📋 Known Limitations
 
-- The "Explore your gift!" CTA shows a placeholder message — the gift room is planned for Increment 2.
-- No real audio/video files are included — the app gracefully ignores missing media.
+- Gallery, Letter Archive, full letter reading, and customization controls are placeholders for future increments.
+- The standee video path is a placeholder until a real video is added; the modal shows a friendly fallback.
 - The design uses Google Fonts via CDN — an internet connection is needed for the custom fonts (system fallbacks are provided).
 
 ## 📝 License

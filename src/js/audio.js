@@ -188,11 +188,18 @@ export function playGlobalMusic() {
 }
 
 /**
- * Pause global background music with fade out.
+ * Pause global background music.
+ * @param {boolean} [immediate=false] Skip the fade when another media source is starting.
  */
-export function pauseGlobalMusic() {
+export function pauseGlobalMusic(immediate = false) {
   bgmRequested = false;
-  fadeOut();
+  if (immediate && bgmElement) {
+    clearFade();
+    bgmElement.pause();
+    bgmElement.volume = 0;
+  } else {
+    fadeOut();
+  }
 }
 
 /**
@@ -240,6 +247,14 @@ export function toggleMute() {
  */
 export function getMuted() {
   return isMuted;
+}
+
+/**
+ * Whether the global track is currently producing (or fading toward) audio.
+ * Used by media overlays so they only resume music that was actually playing.
+ */
+export function isGlobalMusicPlaying() {
+  return Boolean(bgmElement && !bgmElement.paused && !isMuted && bgmRequested);
 }
 
 /**

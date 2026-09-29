@@ -28,9 +28,10 @@ import { toggleMute, getMuted } from './audio.js';
  * @param {() => void} onGoHome - Callback to return to homepage
  */
 export function renderExploreRoom(container, onGoHome) {
-  const allUnlocked = isAllUnlocked();
-  const revealed = isGiftsRevealed();
   const configuredGifts = siteData.gifts || [];
+  const configuredGiftIds = configuredGifts.map((gift) => gift.id);
+  const allUnlocked = isAllUnlocked(configuredGiftIds);
+  const revealed = isGiftsRevealed();
   const stickers = siteData.stickers || [];
 
   container.innerHTML = `
@@ -45,12 +46,12 @@ export function renderExploreRoom(container, onGoHome) {
         </div>
 
         <nav class="header-nav" aria-label="Explore Navigation">
-          <button id="nav-gallery-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="Gallery">
+          <button id="nav-gallery-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="Gallery${allUnlocked ? '' : '. Secret! Access all gifts first!'}" ${allUnlocked ? '' : 'data-tooltip="Secret! Access all gifts first!"'}>
             <span class="nav-icon">${allUnlocked ? '🖼️' : '🔒'}</span>
             <span class="nav-label">Gallery</span>
           </button>
 
-          <button id="nav-letters-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="Letters">
+          <button id="nav-letters-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="Letters${allUnlocked ? '' : '. Secret nganiiiii! Access all gifts first'}" ${allUnlocked ? '' : 'data-tooltip="Secret nganiiiii! Access all gifts first"'}>
             <span class="nav-icon">${allUnlocked ? '💌' : '🔒'}</span>
             <span class="nav-label">Letters</span>
           </button>
@@ -148,7 +149,7 @@ export function renderExploreRoom(container, onGoHome) {
   // Navigation: Gallery
   const galleryBtn = document.getElementById('nav-gallery-btn');
   galleryBtn?.addEventListener('click', () => {
-    if (isAllUnlocked()) {
+    if (isAllUnlocked(configuredGiftIds)) {
       openModal({
         title: '🖼️ Memory Gallery',
         bodyHTML: `<p>Your memory gallery has been unlocked! Full collection coming in the next surprise ✨</p>`,
@@ -161,7 +162,7 @@ export function renderExploreRoom(container, onGoHome) {
   // Navigation: Letters
   const lettersBtn = document.getElementById('nav-letters-btn');
   lettersBtn?.addEventListener('click', () => {
-    if (isAllUnlocked()) {
+    if (isAllUnlocked(configuredGiftIds)) {
       openModal({
         title: '💌 Letter Collection',
         bodyHTML: `<p>Your letter collection has been unlocked! Full letter reader coming soon ✨</p>`,
@@ -231,7 +232,8 @@ export function renderExploreRoom(container, onGoHome) {
   const carouselSection = document.getElementById('carousel-section');
 
   clickMeBtn?.addEventListener('click', () => {
-    if (setGiftsRevealed(true)) {
+    if (!clickMeSection.classList.contains('is-revealed')) {
+      setGiftsRevealed(true);
       // Execute satisfying reveal sequence
       clickMeBtn.classList.add('shake-wiggle');
       burstConfetti({ particleCount: 60, duration: 2500 });
@@ -256,6 +258,15 @@ export function renderExploreRoom(container, onGoHome) {
 
     nextBtn.addEventListener('click', () => {
       track.scrollBy({ left: 260, behavior: 'smooth' });
+    });
+
+    track.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      track.scrollBy({
+        left: event.key === 'ArrowLeft' ? -260 : 260,
+        behavior: 'smooth',
+      });
     });
   }
 
@@ -296,6 +307,7 @@ function renderStickerHTML(sticker) {
       id="sticker-${sticker.id}"
       class="sticker-btn sticker-${sticker.id}"
       title="${sticker.tooltip || sticker.label}"
+      aria-label="${sticker.tooltip || sticker.label}"
     >
       <div class="sticker-inner">
         <img src="${sticker.image}" alt="${sticker.label}" class="sticker-img" />
@@ -308,11 +320,10 @@ function renderGiftCharacterHTML(gift) {
   const viewed = isGiftViewed(gift.id);
 
   return `
-    <div
+    <button
       id="gift-card-${gift.id}"
       class="gift-character-card ${viewed ? 'is-viewed' : ''}"
-      tabindex="0"
-      role="button"
+      type="button"
       aria-label="Gift from ${gift.sender.name}"
     >
       <div class="character-platform">
@@ -326,7 +337,7 @@ function renderGiftCharacterHTML(gift) {
         <span class="sender-name">${gift.sender.name}</span>
         ${viewed ? '<span class="viewed-badge" title="Opened">💌</span>' : '<span class="unopened-badge" title="Unopened">🎁</span>'}
       </div>
-    </div>
+    </button>
   `;
 }
 
@@ -358,12 +369,12 @@ function showToast(message) {
 function openVideoModal(sticker) {
   const videoSrc = sticker.video || '/video/standee-placeholder.mp4';
 
-  openModal({
+  const modal = openModal({
     title: `${sticker.label}`,
     isVideo: true,
     bodyHTML: `
       <div class="video-modal-content">
-        <video controls autoplay class="modal-video-element" onerror="this.style.display='none'; document.getElementById('video-fallback').style.display='block';">
+        <video controls autoplay playsinline class="modal-video-element">
           <source src="${videoSrc}" type="video/mp4" />
           Your browser does not support HTML video.
         </video>
@@ -374,6 +385,13 @@ function openVideoModal(sticker) {
       </div>
     `,
   });
+
+  const video = modal?.querySelector('video');
+  const fallback = modal?.querySelector('#video-fallback');
+  video?.addEventListener('error', () => {
+    video.hidden = true;
+    if (fallback) fallback.style.display = 'block';
+  }, { once: true });
 }
 
 function handleGiftCharacterClick(gift) {
@@ -424,6 +442,8 @@ function handleGiftCharacterClick(gift) {
       const galleryBtn = document.getElementById('nav-gallery-btn');
       if (galleryBtn) {
         galleryBtn.className = 'nav-link-btn unlocked';
+        galleryBtn.removeAttribute('data-tooltip');
+        galleryBtn.setAttribute('aria-label', 'Gallery, unlocked');
         galleryBtn.innerHTML = `
           <span class="nav-icon">🖼️</span>
           <span class="nav-label">Gallery</span>
@@ -433,6 +453,8 @@ function handleGiftCharacterClick(gift) {
       const lettersBtn = document.getElementById('nav-letters-btn');
       if (lettersBtn) {
         lettersBtn.className = 'nav-link-btn unlocked';
+        lettersBtn.removeAttribute('data-tooltip');
+        lettersBtn.setAttribute('aria-label', 'Letters, unlocked');
         lettersBtn.innerHTML = `
           <span class="nav-icon">💌</span>
           <span class="nav-label">Letters</span>

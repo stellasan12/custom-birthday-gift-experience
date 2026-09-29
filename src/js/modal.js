@@ -10,11 +10,13 @@
  * - Pause & resume global BGM when opening video modal
  */
 
-import { pauseGlobalMusic, playGlobalMusic, getMuted } from './audio.js';
+import { pauseGlobalMusic, playGlobalMusic, isGlobalMusicPlaying } from './audio.js';
 
 let activeModalEl = null;
 let escListener = null;
 let bgmWasPlayingBeforeModal = false;
+let previouslyFocusedElement = null;
+let previousBodyOverflow = '';
 
 /**
  * Open a modal with custom HTML content.
@@ -27,11 +29,13 @@ let bgmWasPlayingBeforeModal = false;
 export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
   closeModal(); // Close any active modal first
 
+  previouslyFocusedElement = document.activeElement;
+
   if (isVideo) {
     // If BGM is active and unmuted, pause it temporarily while video is playing
-    bgmWasPlayingBeforeModal = !getMuted();
+    bgmWasPlayingBeforeModal = isGlobalMusicPlaying();
     if (bgmWasPlayingBeforeModal) {
-      pauseGlobalMusic();
+      pauseGlobalMusic(true);
     }
   }
 
@@ -39,12 +43,13 @@ export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
   backdrop.className = 'modal-backdrop';
   backdrop.setAttribute('role', 'dialog');
   backdrop.setAttribute('aria-modal', 'true');
-  backdrop.setAttribute('aria-label', title || 'Modal Window');
+  const titleId = `modal-title-${Date.now()}`;
+  backdrop.setAttribute('aria-labelledby', titleId);
 
   backdrop.innerHTML = `
     <div class="modal-card card-glass">
       <div class="modal-header">
-        <h3 class="modal-title font-heading">${title}</h3>
+        <h3 class="modal-title font-heading" id="${titleId}">${title}</h3>
         <button class="modal-close-btn" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -55,6 +60,9 @@ export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
 
   document.body.appendChild(backdrop);
   activeModalEl = backdrop;
+  previousBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  document.getElementById('app')?.setAttribute('inert', '');
 
   // Fade in modal
   requestAnimationFrame(() => {
@@ -80,9 +88,28 @@ export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
   escListener = (e) => {
     if (e.key === 'Escape') {
       handleClose();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const focusable = [...backdrop.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), video[controls], [tabindex]:not([tabindex="-1"])'
+      )];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   };
   document.addEventListener('keydown', escListener);
+
+  return backdrop;
 }
 
 /**
@@ -111,6 +138,14 @@ export function closeModal() {
     bgmWasPlayingBeforeModal = false;
     playGlobalMusic();
   }
+
+  document.body.style.overflow = previousBodyOverflow;
+  document.getElementById('app')?.removeAttribute('inert');
+
+  if (previouslyFocusedElement instanceof HTMLElement && previouslyFocusedElement.isConnected) {
+    previouslyFocusedElement.focus();
+  }
+  previouslyFocusedElement = null;
 
   current.classList.remove('is-visible');
   setTimeout(() => {

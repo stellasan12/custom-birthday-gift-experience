@@ -10,7 +10,7 @@ const STORAGE_KEY = 'birthdayGiftExperience';
 const defaultState = {
   hasRevealedGifts: false,
   viewedGiftIds: [],
-  unlockedAll: false,
+  allGiftsViewed: false,
 };
 
 /**
@@ -24,8 +24,10 @@ export function getStorage() {
     const parsed = JSON.parse(raw);
     return {
       hasRevealedGifts: Boolean(parsed.hasRevealedGifts),
-      viewedGiftIds: Array.isArray(parsed.viewedGiftIds) ? parsed.viewedGiftIds : [],
-      unlockedAll: Boolean(parsed.unlockedAll),
+      viewedGiftIds: Array.isArray(parsed.viewedGiftIds)
+        ? [...new Set(parsed.viewedGiftIds.filter((id) => typeof id === 'string'))]
+        : [],
+      allGiftsViewed: Boolean(parsed.allGiftsViewed ?? parsed.unlockedAll),
     };
   } catch (err) {
     console.warn('[Storage] Failed to read from localStorage:', err);
@@ -90,24 +92,31 @@ export function markGiftViewed(giftId, configuredGiftIds = []) {
     configuredGiftIds.length > 0 &&
     configuredGiftIds.every((id) => updatedIds.includes(id));
 
-  const unlockedAll = current.unlockedAll || allViewedNow;
-
   saveStorage({
     viewedGiftIds: updatedIds,
-    unlockedAll: unlockedAll,
+    allGiftsViewed: allViewedNow,
   });
 
   return {
     isNewView: !alreadyViewed,
-    allViewedNow: allViewedNow && !current.unlockedAll,
+    allViewedNow: allViewedNow && !current.allGiftsViewed,
   };
 }
 
 /**
  * Check if all gifts have been unlocked.
  */
-export function isAllUnlocked() {
-  return getStorage().unlockedAll;
+export function isAllUnlocked(configuredGiftIds = null) {
+  const state = getStorage();
+  if (!Array.isArray(configuredGiftIds)) return state.allGiftsViewed;
+
+  const allGiftsViewed = configuredGiftIds.length > 0
+    && configuredGiftIds.every((id) => state.viewedGiftIds.includes(id));
+
+  if (allGiftsViewed !== state.allGiftsViewed) {
+    saveStorage({ allGiftsViewed });
+  }
+  return allGiftsViewed;
 }
 
 /**

@@ -26,6 +26,7 @@ const REVEAL_STEP_MS = 300; // delay between each homepage element
 // ── State ──
 let introTimer = null;
 let currentSlide = 0;
+let introKeyHandler = null;
 
 /**
  * Boot the entire application.
@@ -166,13 +167,12 @@ function setupIntro() {
   skipBtn?.addEventListener('click', () => endIntro());
 
   // Keyboard: Escape or Enter to skip
-  const handleKey = (e) => {
+  introKeyHandler = (e) => {
     if (e.key === 'Escape' || e.key === 'Enter') {
       endIntro();
-      document.removeEventListener('keydown', handleKey);
     }
   };
-  document.addEventListener('keydown', handleKey);
+  document.addEventListener('keydown', introKeyHandler);
 
   if (siteData.intro.type === 'video') {
     setupVideoIntro();
@@ -252,6 +252,11 @@ function endIntro() {
     introTimer = null;
   }
 
+  if (introKeyHandler) {
+    document.removeEventListener('keydown', introKeyHandler);
+    introKeyHandler = null;
+  }
+
   const introEl = document.getElementById('intro');
   if (!introEl || introEl.classList.contains('fade-out')) return;
 
@@ -323,10 +328,15 @@ function handleExploreGift() {
   const appEl = document.getElementById('app');
   if (!appEl) return;
 
-  // Render Explore Room; returning Home restarts the intro & homepage experience!
-  renderExploreRoom(appEl, () => {
-    initApp();
-  });
+  const homepage = document.getElementById('homepage');
+  homepage?.classList.add('exiting');
+
+  // Let the homepage settle into a short transition before swapping views.
+  setTimeout(() => {
+    renderExploreRoom(appEl, () => {
+      initApp();
+    });
+  }, 280);
 }
 
 // ═════════════════════════════════════════════════

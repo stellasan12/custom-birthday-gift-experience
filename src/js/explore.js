@@ -73,20 +73,34 @@ export function renderExploreRoom(container, onGoHome) {
         <!-- TOAST CONTAINER FOR LOCKED MESSAGES -->
         <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
-        <!-- DECORATIVE STICKERS LAYER -->
-        <div class="stickers-container">
-          ${stickers.map((s) => renderStickerHTML(s)).join('')}
-        </div>
+        <!-- ROOM CENTER: Stickers + Click Me in flex layout -->
+        <div class="room-center">
+          <!-- Top row: poster sticker above -->
+          <div class="room-top-row">
+            ${stickers.filter(s => s.id === 'poster').map(s => renderStickerHTML(s)).join('')}
+          </div>
 
-        <!-- CENTERPIECE: CLICK ME OBJECT -->
-        <section id="click-me-section" class="click-me-section ${revealed ? 'is-revealed' : ''}">
-          <button id="click-me-btn" class="click-me-btn" aria-label="Click me to reveal your birthday gifts">
-            <div class="click-me-box">
-              <img src="/images/placeholders/intro-03.svg" alt="Gift Box" class="click-me-img" />
-              <div class="click-me-badge font-heading">${siteData.explore.clickMePrompt}</div>
+          <!-- Main row: flower | click-me | standee -->
+          <div class="room-main-row">
+            <div class="room-side room-side-left">
+              ${stickers.filter(s => s.id === 'flower').map(s => renderStickerHTML(s)).join('')}
             </div>
-          </button>
-        </section>
+
+            <!-- CENTERPIECE: CLICK ME OBJECT -->
+            <section id="click-me-section" class="click-me-section ${revealed ? 'is-revealed' : ''}">
+              <button id="click-me-btn" class="click-me-btn" aria-label="Click me to reveal your birthday gifts">
+                <div class="click-me-box">
+                  <img src="/images/placeholders/intro-03.svg" alt="Gift Box" class="click-me-img" />
+                  <div class="click-me-badge font-heading">${siteData.explore.clickMePrompt}</div>
+                </div>
+              </button>
+            </section>
+
+            <div class="room-side room-side-right">
+              ${stickers.filter(s => s.id === 'standee').map(s => renderStickerHTML(s)).join('')}
+            </div>
+          </div>
+        </div>
 
         <!-- CAROUSEL SECTION -->
         <section id="carousel-section" class="carousel-section ${revealed ? 'is-visible' : 'is-hidden'}">

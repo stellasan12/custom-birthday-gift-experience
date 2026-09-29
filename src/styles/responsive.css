@@ -27,7 +27,8 @@
   }
 
   .nav-title {
-    display: none; /* Hide long celebrant title on small mobile to prevent overflow */
+    display: none;
+    /* Hide long celebrant title on small mobile to prevent overflow */
   }
 
   .header-nav {
@@ -43,9 +44,14 @@
     font-size: 0.75rem;
   }
 
-  .sticker-flower { top: 4%; left: 2%; }
-  .sticker-standee { bottom: 4%; right: 2%; }
-  .sticker-poster { top: 4%; right: 2%; }
+  .room-main-row {
+    gap: 12px;
+  }
+
+  .sticker-img {
+    width: 55px;
+    height: 55px;
+  }
 
   .carousel-track {
     padding: 12px 20px;

@@ -678,16 +678,43 @@ svg {
   justify-content: center;
 }
 
-.stickers-container {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
+/* ═══════════════════════════════════════════════
+   ROOM CENTER — Flex layout for stickers + click me
+   Adjust margin-top on .room-side items to move stickers up/down
+   ═══════════════════════════════════════════════ */
+.room-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+}
+
+.room-top-row {
+  display: flex;
+  justify-content: center;
+  /* ↓ Nudge poster sticker up/down with margin */
+  margin-bottom: -8px;
+}
+
+.room-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 5vw, 60px);
+  width: 100%;
+}
+
+.room-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* ↓ Adjust margin-top to move stickers up/down within the row */
+  margin-top: 0;
 }
 
 .sticker-btn {
-  position: absolute;
-  pointer-events: auto;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -717,10 +744,6 @@ svg {
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   white-space: nowrap;
 }
-
-.sticker-flower { top: 8%; left: 6%; }
-.sticker-standee { bottom: 12%; right: 6%; }
-.sticker-poster { top: 12%; right: 8%; }
 
 .sticker-btn:hover .sticker-img {
   transform: scale(1.15) rotate(6deg);

@@ -8,6 +8,7 @@
 import './styles/main.css';
 import './styles/animations.css';
 import './styles/responsive.css';
+import './styles/gallery.css';
 
 import { initApp } from './js/app.js';
 

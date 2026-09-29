@@ -18,6 +18,7 @@ import {
   onStateChange,
 } from './audio.js';
 import { renderExploreRoom } from './explore.js';
+import { renderGallery } from './gallery.js';
 
 // ── Constants ──
 const INTRO_FADE_MS = 800;
@@ -333,9 +334,8 @@ function handleExploreGift() {
 
   // Let the homepage settle into a short transition before swapping views.
   setTimeout(() => {
-    renderExploreRoom(appEl, () => {
-      initApp();
-    });
+    const showExplore = () => renderExploreRoom(appEl, () => initApp(), () => renderGallery(appEl, showExplore));
+    showExplore();
   }, 280);
 }
 

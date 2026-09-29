@@ -28,7 +28,7 @@ import { openLetter } from './letter-reader.js';
  * @param {HTMLElement} container
  * @param {() => void} onGoHome - Callback to return to homepage
  */
-export function renderExploreRoom(container, onGoHome) {
+export function renderExploreRoom(container, onGoHome, onOpenGallery) {
   const configuredGifts = siteData.gifts || [];
   const configuredGiftIds = configuredGifts.map((gift) => gift.id);
   const allUnlocked = isAllUnlocked(configuredGiftIds);
@@ -151,10 +151,7 @@ export function renderExploreRoom(container, onGoHome) {
   const galleryBtn = document.getElementById('nav-gallery-btn');
   galleryBtn?.addEventListener('click', () => {
     if (isAllUnlocked(configuredGiftIds)) {
-      openModal({
-        title: '🖼️ Memory Gallery',
-        bodyHTML: `<p>Your memory gallery has been unlocked! Full collection coming in the next surprise ✨</p>`,
-      });
+      onOpenGallery?.();
     } else {
       triggerLockedFeedback(galleryBtn, 'Secret! Access all gifts first! 🔒');
     }

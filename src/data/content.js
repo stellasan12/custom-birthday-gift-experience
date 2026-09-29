@@ -49,6 +49,50 @@ export const siteData = {
     defaultVolume: 0.4,
   },
 
+  /** MEMORY GALLERY — both Gallery and Social views render this same data. */
+  gallery: {
+    title: "Our Memories",
+    albums: [
+      {
+        id: "album-us",
+        title: "Us Being Us",
+        description: "A collection of questionable decisions ♡",
+        coverImage: "/images/gallery/album-01/cover.svg",
+        photos: [
+          { id: "us-001", src: "/images/gallery/album-01/photo-01.svg", alt: "A warm placeholder for a shared memory", caption: "The kind of day we still laugh about.", date: "2026-01-14" },
+          { id: "us-002", src: "/images/gallery/album-01/photo-02.svg", alt: "A pink placeholder for a candid memory", caption: "Proof that the unplanned moments are the best ones.", date: "2026-02-02" },
+          { id: "us-003", src: "/images/gallery/album-01/photo-03.svg", alt: "A scrapbook placeholder for friends", caption: "Just us, being wonderfully unserious.", date: "2026-02-18" },
+          { id: "us-004", src: "/images/gallery/album-01/photo-04.svg", alt: "A lavender placeholder for a favorite day", caption: "One for the forever folder.", date: "2026-03-01" },
+        ],
+      },
+      {
+        id: "album-adventures",
+        title: "Little Adventures",
+        description: "Places, detours, and tiny discoveries ✦",
+        coverImage: "/images/gallery/album-02/cover.svg",
+        photos: [
+          { id: "adventure-001", src: "/images/gallery/album-02/photo-01.svg", alt: "A sunny travel memory placeholder", caption: "We took the scenic route—and it was worth it.", date: "2026-03-12" },
+          { id: "adventure-002", src: "/images/gallery/album-02/photo-02.svg", alt: "A blue placeholder for a day out", caption: "Somewhere new, with my favorite company.", date: "2026-04-05" },
+          { id: "adventure-003", src: "/images/gallery/album-02/photo-03.svg", alt: "A postcard-style memory placeholder", caption: "A tiny adventure with a very big place in my heart.", date: "2026-04-22" },
+          { id: "adventure-004", src: "/images/gallery/album-02/photo-04.svg", alt: "A sunset memory placeholder", caption: "Stayed until the sky changed colors.", date: "2026-05-09" },
+          { id: "adventure-005", src: "/images/gallery/album-02/photo-05.svg", alt: "A green placeholder for an outdoor memory", caption: "Let’s do this again someday.", date: "2026-05-20" },
+        ],
+      },
+      {
+        id: "album-soft-moments",
+        title: "Soft Moments",
+        description: "The quiet memories that mean everything ♡",
+        coverImage: "/images/gallery/album-03/cover.svg",
+        photos: [
+          { id: "soft-001", src: "/images/gallery/album-03/photo-01.svg", alt: "A cream placeholder for a quiet memory", caption: "Nothing grand—just a really lovely day.", date: "2026-06-03" },
+          { id: "soft-002", src: "/images/gallery/album-03/photo-02.svg", alt: "A floral memory placeholder", caption: "A little moment I never want to forget.", date: "2026-06-19" },
+          { id: "soft-003", src: "/images/gallery/album-03/photo-03.svg", alt: "A peach placeholder for a cozy memory", caption: "Comfort looks a lot like this.", date: "2026-07-07" },
+          { id: "soft-004", src: "/images/gallery/album-03/photo-04.svg", alt: "A starry placeholder for a favorite memory", caption: "Still one of my favorites.", date: "2026-07-25" },
+        ],
+      },
+    ],
+  },
+
   /**
    * EXPLORE ROOM & GIFTS
    */

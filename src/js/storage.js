@@ -12,7 +12,28 @@ const defaultState = {
   viewedGiftIds: [],
   allGiftsViewed: false,
   annotations: {},
+  gallery: {
+    preferredView: 'gallery',
+    photoComments: {},
+    favoritePhotoIds: [],
+  },
 };
+
+function sanitizeGallery(value) {
+  const gallery = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const rawComments = gallery.photoComments && typeof gallery.photoComments === 'object'
+    ? gallery.photoComments : {};
+  const photoComments = Object.fromEntries(Object.entries(rawComments).map(([photoId, notes]) => [
+    photoId,
+    Array.isArray(notes) ? notes.filter((note) => note && typeof note.id === 'string' && typeof note.text === 'string') : [],
+  ]));
+  return {
+    preferredView: gallery.preferredView === 'social' ? 'social' : 'gallery',
+    photoComments,
+    favoritePhotoIds: Array.isArray(gallery.favoritePhotoIds)
+      ? [...new Set(gallery.favoritePhotoIds.filter((id) => typeof id === 'string'))] : [],
+  };
+}
 
 function sanitizeAnnotations(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
@@ -43,6 +64,7 @@ export function getStorage() {
         : [],
       allGiftsViewed: Boolean(parsed.allGiftsViewed ?? parsed.unlockedAll),
       annotations: sanitizeAnnotations(parsed.annotations),
+      gallery: sanitizeGallery(parsed.gallery),
     };
   } catch (err) {
     console.warn('[Storage] Failed to read from localStorage:', err);
@@ -148,6 +170,25 @@ export function saveGiftAnnotations(giftId, records) {
   };
   saveStorage({ annotations });
   return [...annotations[giftId]];
+}
+
+export function getGalleryState() {
+  const gallery = getStorage().gallery;
+  return { ...gallery, photoComments: { ...gallery.photoComments }, favoritePhotoIds: [...gallery.favoritePhotoIds] };
+}
+
+export function saveGalleryState(updates) {
+  const state = getStorage();
+  return saveStorage({ gallery: sanitizeGallery({ ...state.gallery, ...updates }) }).gallery;
+}
+
+export function getPhotoComments(photoId) {
+  return [...(getGalleryState().photoComments[photoId] || [])];
+}
+
+export function savePhotoComments(photoId, comments) {
+  const gallery = getGalleryState();
+  return saveGalleryState({ photoComments: { ...gallery.photoComments, [photoId]: comments } });
 }
 
 /**

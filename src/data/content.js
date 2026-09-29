@@ -137,7 +137,6 @@ export const siteData = {
       id: "flower",
       type: "petals",
       image: "/images/placeholders/intro-01.svg",
-      label: "Magic Flower 🌸",
       tooltip: "Click for petal shower magic!",
     },
     {
@@ -145,14 +144,12 @@ export const siteData = {
       type: "video",
       image: "/images/placeholders/birthday-character.svg",
       video: "/video/standee-placeholder.mp4",
-      label: "Star Standee ⭐",
       tooltip: "Click to watch special message video!",
     },
     {
       id: "poster",
       type: "music",
       image: "/images/placeholders/intro-03.svg",
-      label: "Music Poster 🎵",
       tooltip: "Click to toggle background music!",
     },
   ],

@@ -10,13 +10,18 @@
   --color-background: #FFF9F5;
   --color-surface: #FFFFFF;
   --color-surface-warm: #FFF0EB;
-  --color-primary: #F4A0B5;        /* soft pink */
+  --color-primary: #F4A0B5;
+  /* soft pink */
   --color-primary-hover: #EF8DA3;
   --color-primary-active: #E87A94;
-  --color-secondary: #D1B3F0;      /* lavender */
-  --color-accent: #FFE5A0;         /* pastel yellow */
-  --color-accent-warm: #FFD0A0;    /* muted peach */
-  --color-text: #5C4A42;           /* warm brown */
+  --color-secondary: #D1B3F0;
+  /* lavender */
+  --color-accent: #FFE5A0;
+  /* pastel yellow */
+  --color-accent-warm: #FFD0A0;
+  /* muted peach */
+  --color-text: #5C4A42;
+  /* warm brown */
   --color-text-light: #8B7B74;
   --color-text-heading: #4A3728;
   --color-text-on-primary: #FFFFFF;
@@ -87,7 +92,9 @@ body {
 }
 
 /* ── Headings ── */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: var(--color-text-heading);
   line-height: 1.2;
 }
@@ -180,6 +187,7 @@ svg {
   from {
     transform: scale(1) translate(0, 0);
   }
+
   to {
     transform: scale(1.08) translate(-1%, -1%);
   }
@@ -321,12 +329,10 @@ svg {
   width: min(600px, 90vw);
   height: min(600px, 90vw);
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(244, 160, 181, 0.08) 0%,
-    rgba(209, 179, 240, 0.05) 40%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(244, 160, 181, 0.08) 0%,
+      rgba(209, 179, 240, 0.05) 40%,
+      transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -355,8 +361,15 @@ svg {
 }
 
 @keyframes gentleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .homepage__character img {
@@ -454,9 +467,19 @@ svg {
 }
 
 @keyframes ctaWiggle {
-  0%, 100% { transform: translateX(3px) rotate(0deg); }
-  25% { transform: translateX(3px) rotate(-8deg); }
-  75% { transform: translateX(3px) rotate(8deg); }
+
+  0%,
+  100% {
+    transform: translateX(3px) rotate(0deg);
+  }
+
+  25% {
+    transform: translateX(3px) rotate(-8deg);
+  }
+
+  75% {
+    transform: translateX(3px) rotate(8deg);
+  }
 }
 
 /* Placeholder message (shown when CTA is clicked but next page isn't built yet) */
@@ -695,6 +718,7 @@ svg {
   justify-content: center;
   /* ↓ Nudge poster sticker up/down with margin */
   margin-bottom: -8px;
+  margin-left: 300px;
 }
 
 .room-main-row {
@@ -733,16 +757,6 @@ svg {
   height: clamp(65px, 9vw, 100px);
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
   transition: transform var(--transition-fast);
-}
-
-.sticker-badge {
-  font-size: 0.75rem;
-  font-family: var(--font-heading);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 2px 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  white-space: nowrap;
 }
 
 .sticker-btn:hover .sticker-img {
@@ -855,6 +869,7 @@ svg {
 .carousel-track::-webkit-scrollbar {
   height: 6px;
 }
+
 .carousel-track::-webkit-scrollbar-thumb {
   background: var(--color-primary);
   border-radius: 10px;
@@ -880,8 +895,13 @@ svg {
   transition: all var(--transition-fast);
 }
 
-.carousel-nav-btn.prev { left: 0; }
-.carousel-nav-btn.next { right: 0; }
+.carousel-nav-btn.prev {
+  left: 0;
+}
+
+.carousel-nav-btn.next {
+  right: 0;
+}
 
 .carousel-nav-btn:hover {
   background: var(--color-primary);
@@ -1043,4 +1063,3 @@ svg {
   font-size: 0.95rem;
   box-shadow: var(--shadow-medium);
 }
-

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#F5E6D3"/>
+      <stop offset="100%" stop-color="#E8D5C0"/>
+    </radialGradient>
+    <radialGradient id="cheekGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFB5C5"/>
+      <stop offset="100%" stop-color="#FFB5C5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Body -->
+  <ellipse cx="150" cy="310" rx="80" ry="70" fill="url(#bodyGrad)"/>
+
+  <!-- Head -->
+  <circle cx="150" cy="180" r="90" fill="url(#bodyGrad)"/>
+
+  <!-- Ears -->
+  <circle cx="80" cy="110" r="30" fill="#E8D5C0"/>
+  <circle cx="80" cy="110" r="18" fill="#FFB5C5" opacity="0.5"/>
+  <circle cx="220" cy="110" r="30" fill="#E8D5C0"/>
+  <circle cx="220" cy="110" r="18" fill="#FFB5C5" opacity="0.5"/>
+
+  <!-- Eyes -->
+  <circle cx="120" cy="175" r="8" fill="#4A3728"/>
+  <circle cx="180" cy="175" r="8" fill="#4A3728"/>
+  <circle cx="117" cy="172" r="3" fill="white"/>
+  <circle cx="177" cy="172" r="3" fill="white"/>
+
+  <!-- Nose -->
+  <ellipse cx="150" cy="195" rx="8" ry="6" fill="#C4956A"/>
+
+  <!-- Mouth -->
+  <path d="M140 205 Q150 218 160 205" stroke="#4A3728" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Cheeks -->
+  <circle cx="105" cy="200" r="15" fill="url(#cheekGrad)"/>
+  <circle cx="195" cy="200" r="15" fill="url(#cheekGrad)"/>
+
+  <!-- Party hat -->
+  <polygon points="150,50 120,140 180,140" fill="#FFD1DC" stroke="#E8B4C8" stroke-width="2"/>
+  <polygon points="150,50 130,140 170,140" fill="#E8C5F0" opacity="0.5"/>
+  <line x1="135" y1="95" x2="165" y2="95" stroke="#FFE5A0" stroke-width="3" stroke-linecap="round"/>
+  <line x1="140" y1="75" x2="160" y2="75" stroke="#B5D8F7" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="150" cy="48" r="10" fill="#FFE5A0"/>
+
+  <!-- Arms -->
+  <ellipse cx="85" cy="300" rx="25" ry="18" fill="url(#bodyGrad)" transform="rotate(-20 85 300)"/>
+  <ellipse cx="215" cy="300" rx="25" ry="18" fill="url(#bodyGrad)" transform="rotate(20 215 300)"/>
+
+  <!-- Feet -->
+  <ellipse cx="120" cy="370" rx="28" ry="16" fill="#E8D5C0"/>
+  <ellipse cx="180" cy="370" rx="28" ry="16" fill="#E8D5C0"/>
+
+  <!-- Heart -->
+  <path d="M215,145 C200,130 180,150 195,170 L215,190 L235,170 C250,150 230,130 215,145Z" fill="#FFB5C5" opacity="0.7" transform="scale(0.5) translate(210 130)"/>
+
+  <!-- Sparkle decorations (4-point stars instead of emoji) -->
+  <polygon points="60,80 63,74 66,80 63,86" fill="#FFE5A0" opacity="0.6"/>
+  <polygon points="240,75 242,70 244,75 242,80" fill="#E8C5F0" opacity="0.6"/>
+  <polygon points="250,255 252,250 254,255 252,260" fill="#FFE5A0" opacity="0.5"/>
+  <polygon points="50,255 52,251 54,255 52,259" fill="#B5D8F7" opacity="0.5"/>
+</svg>

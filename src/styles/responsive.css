@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — Birthday Gift Experience
+   Mobile-first adjustments for key breakpoints
+   ═══════════════════════════════════════════════ */
+
+/* ── Small phones (≤ 380px) ── */
+@media (max-width: 380px) {
+  .homepage {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  .homepage__cta {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.95rem;
+  }
+
+  .intro__skip {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+
+/* ── Tablets (≥ 768px) ── */
+@media (min-width: 768px) {
+  .homepage {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .homepage__character {
+    margin-bottom: var(--space-xl);
+  }
+
+  .intro__skip {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: 0.95rem;
+  }
+}
+
+/* ── Desktop (≥ 1024px) ── */
+@media (min-width: 1024px) {
+  .homepage {
+    padding: var(--space-2xl) var(--space-xl);
+  }
+}
+
+/* ── Large desktop (≥ 1440px) ── */
+@media (min-width: 1440px) {
+  .homepage__greeting-name {
+    font-size: 4.5rem;
+  }
+}
+
+/* ── Landscape phones ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .homepage {
+    padding: var(--space-md);
+  }
+
+  .homepage__character {
+    width: clamp(100px, 20vh, 160px);
+    margin-bottom: var(--space-md);
+  }
+
+  .homepage__greeting-name {
+    font-size: clamp(1.5rem, 5vh, 2.5rem);
+  }
+}
+
+/* ── Prevent content overflow ── */
+html,
+body {
+  overflow-x: hidden;
+}

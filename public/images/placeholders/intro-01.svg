@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5F5"/>
+      <stop offset="50%" stop-color="#FFE8F0"/>
+      <stop offset="100%" stop-color="#F0E6FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg1)"/>
+
+  <!-- Soft floating circles -->
+  <circle cx="200" cy="150" r="60" fill="#FFD1DC" opacity="0.3"/>
+  <circle cx="600" cy="400" r="80" fill="#E8C5F0" opacity="0.25"/>
+  <circle cx="400" cy="100" r="40" fill="#FFE5A0" opacity="0.3"/>
+  <circle cx="100" cy="450" r="50" fill="#B5D8F7" opacity="0.2"/>
+  <circle cx="680" cy="120" r="30" fill="#A8E6CF" opacity="0.2"/>
+  <circle cx="350" cy="500" r="35" fill="#FFD1DC" opacity="0.2"/>
+
+  <!-- Big sparkle (4-point star) -->
+  <polygon points="400,220 410,270 460,280 410,290 400,340 390,290 340,280 390,270" fill="#FFD1DC" opacity="0.5"/>
+
+  <!-- Small sparkles -->
+  <polygon points="200,200 203,190 206,200 203,210" fill="#FFE5A0" opacity="0.5"/>
+  <polygon points="600,180 602,174 604,180 602,186" fill="#E8C5F0" opacity="0.5"/>
+  <polygon points="500,450 502,444 504,450 502,456" fill="#B5D8F7" opacity="0.4"/>
+  <polygon points="150,350 152,345 154,350 152,355" fill="#FFD1DC" opacity="0.4"/>
+  <polygon points="650,320 652,315 654,320 652,325" fill="#A8E6CF" opacity="0.4"/>
+
+  <!-- Flower petals -->
+  <g transform="translate(550,180)" opacity="0.35">
+    <ellipse cx="0" cy="-12" rx="6" ry="12" fill="#FFB5C5"/>
+    <ellipse cx="0" cy="-12" rx="6" ry="12" fill="#FFB5C5" transform="rotate(72)"/>
+    <ellipse cx="0" cy="-12" rx="6" ry="12" fill="#FFB5C5" transform="rotate(144)"/>
+    <ellipse cx="0" cy="-12" rx="6" ry="12" fill="#FFB5C5" transform="rotate(216)"/>
+    <ellipse cx="0" cy="-12" rx="6" ry="12" fill="#FFB5C5" transform="rotate(288)"/>
+    <circle cx="0" cy="0" r="5" fill="#FFE5A0"/>
+  </g>
+
+  <!-- Center text (safe SVG text, no emoji) -->
+  <text x="400" y="295" text-anchor="middle" font-family="Georgia,serif" font-size="28" fill="#C9A0B8" opacity="0.7">Something special is coming...</text>
+</svg>

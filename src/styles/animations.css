@@ -1,0 +1,137 @@
+/* ═══════════════════════════════════════════════
+   ANIMATIONS — Birthday Gift Experience
+   Reusable keyframes and animation utilities
+   ═══════════════════════════════════════════════ */
+/* ── Fade variants ── */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ── Decorative ── */
+@keyframes sparkle {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* ── Gentle pulse for idle elements ── */
+@keyframes gentlePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.03);
+    }
+}
+
+/* ── Decorative floating shapes (background) ── */
+@keyframes floatSlow {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(10px, -15px) rotate(2deg);
+    }
+
+    50% {
+        transform: translate(-5px, -25px) rotate(-1deg);
+    }
+
+    75% {
+        transform: translate(-15px, -10px) rotate(1deg);
+    }
+}
+
+/* ── Slide-in from bottom (for reveal sequence) ── */
+@keyframes slideInFromBottom {
+    from {
+        opacity: 0;
+        transform: translateY(60px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ═══════════════════════════════════════════════
+   REDUCED MOTION
+   Users who prefer reduced motion get simplified
+   or no animations.
+   ═══════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .intro__slide.active img {
+        animation: none;
+    }
+
+    .homepage__character.idle {
+        animation: none;
+    }
+}

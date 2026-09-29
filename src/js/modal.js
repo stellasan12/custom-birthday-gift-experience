@@ -25,8 +25,10 @@ let previousBodyOverflow = '';
  * @param {string} options.bodyHTML
  * @param {boolean} [options.isVideo] - Whether the modal contains a playing video
  * @param {() => void} [options.onClose] - Callback fired on close
+ * @param {() => boolean} [options.beforeClose] - Return false to cancel closing
+ * @param {string} [options.modalClass] - Additional class for the modal card
  */
-export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
+export function openModal({ title, bodyHTML, isVideo = false, onClose, beforeClose, modalClass = '' }) {
   closeModal(); // Close any active modal first
 
   previouslyFocusedElement = document.activeElement;
@@ -47,7 +49,7 @@ export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
   backdrop.setAttribute('aria-labelledby', titleId);
 
   backdrop.innerHTML = `
-    <div class="modal-card card-glass">
+    <div class="modal-card card-glass ${modalClass}">
       <div class="modal-header">
         <h3 class="modal-title font-heading" id="${titleId}">${title}</h3>
         <button class="modal-close-btn" aria-label="Close modal">&times;</button>
@@ -73,6 +75,7 @@ export function openModal({ title, bodyHTML, isVideo = false, onClose }) {
   closeBtn?.focus();
 
   const handleClose = () => {
+    if (beforeClose && beforeClose() === false) return;
     closeModal();
     if (onClose) onClose();
   };

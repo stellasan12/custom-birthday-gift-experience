@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Sender photo placeholder</title>
+  <desc id="desc">A friendly illustrated heart on a warm pastel background.</desc>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#ffe7dc"/><stop offset="1" stop-color="#dbc7f6"/></linearGradient></defs>
+  <rect width="320" height="320" rx="28" fill="url(#bg)"/>
+  <circle cx="63" cy="65" r="8" fill="#fff" opacity=".7"/><circle cx="263" cy="84" r="5" fill="#fff" opacity=".8"/>
+  <path d="M160 250C82 205 65 165 78 129c13-37 63-43 82-9 19-34 69-28 82 9 13 36-4 76-82 121z" fill="#f390aa" stroke="#fff7ef" stroke-width="9"/>
+  <path d="M128 161q32 29 64 0" fill="none" stroke="#7d5364" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="127" cy="145" r="6" fill="#7d5364"/><circle cx="193" cy="145" r="6" fill="#7d5364"/>
+  <g fill="#fff7ef"><path d="m57 235 5 13 14 2-11 9 3 14-11-7-12 7 4-14-11-9 14-2z"/><path d="m263 209 4 10 11 2-9 7 3 11-9-6-10 6 3-11-8-7 11-2z"/></g>
+</svg>

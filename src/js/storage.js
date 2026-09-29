@@ -11,7 +11,21 @@ const defaultState = {
   hasRevealedGifts: false,
   viewedGiftIds: [],
   allGiftsViewed: false,
+  annotations: {},
 };
+
+function sanitizeAnnotations(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value).map(([giftId, records]) => [
+      giftId,
+      Array.isArray(records)
+        ? records.filter((record) => record && typeof record === 'object')
+        : [],
+    ])
+  );
+}
 
 /**
  * Read the current stored progress state.
@@ -28,6 +42,7 @@ export function getStorage() {
         ? [...new Set(parsed.viewedGiftIds.filter((id) => typeof id === 'string'))]
         : [],
       allGiftsViewed: Boolean(parsed.allGiftsViewed ?? parsed.unlockedAll),
+      annotations: sanitizeAnnotations(parsed.annotations),
     };
   } catch (err) {
     console.warn('[Storage] Failed to read from localStorage:', err);
@@ -117,6 +132,22 @@ export function isAllUnlocked(configuredGiftIds = null) {
     saveStorage({ allGiftsViewed });
   }
   return allGiftsViewed;
+}
+
+/** Return a copy of the receiver annotations saved for one gift. */
+export function getGiftAnnotations(giftId) {
+  return [...(getStorage().annotations[giftId] || [])];
+}
+
+/** Replace the receiver annotations for one gift. */
+export function saveGiftAnnotations(giftId, records) {
+  const state = getStorage();
+  const annotations = {
+    ...state.annotations,
+    [giftId]: Array.isArray(records) ? records : [],
+  };
+  saveStorage({ annotations });
+  return [...annotations[giftId]];
 }
 
 /**

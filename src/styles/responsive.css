@@ -61,6 +61,46 @@
   .gift-character-card {
     flex: 0 0 170px;
   }
+
+  .modal-backdrop:has(.letter-reader-modal) {
+    padding: 6px;
+  }
+
+  .letter-reader-modal {
+    max-height: 97svh;
+    border-radius: 16px;
+  }
+
+  .letter-reader-modal > .modal-body {
+    padding: 8px;
+  }
+
+  .letter-paper {
+    margin: 6px auto;
+    padding: 34px 18px 22px;
+  }
+
+  .letter-sender { gap: 14px; }
+  .sender-polaroid { width: 88px; padding: 6px 6px 17px; }
+  .letter-sender-photo { width: 76px; }
+  .letter-heading { margin-bottom: 22px; }
+  .receiver-reaction { margin-left: 10px; }
+  .receiver-reaction-actions { opacity: 1; }
+
+  .letter-music {
+    flex-wrap: wrap;
+  }
+
+  .letter-music-label { flex: 1; }
+  .letter-music-status { width: 100%; }
+
+  .selection-toolbar {
+    right: auto;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+  }
+
+  .reaction-composer { padding: 14px; }
 }
 
 /* ── Tablets (≥ 768px) ── */

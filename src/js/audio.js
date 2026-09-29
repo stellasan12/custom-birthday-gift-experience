@@ -39,6 +39,10 @@ let onStateChangeCallback = null;
 // ── Interaction listener references (for cleanup) ──
 let interactionHandler = null;
 
+/** Letter music is managed here so only one secondary track can exist. */
+let letterAudioElement = null;
+let resumeGlobalAfterLetter = false;
+
 /**
  * Initialise the audio system.
  * Creates the <audio> element but does NOT attempt playback.
@@ -255,6 +259,45 @@ export function getMuted() {
  */
 export function isGlobalMusicPlaying() {
   return Boolean(bgmElement && !bgmElement.paused && !isMuted && bgmRequested);
+}
+
+/**
+ * Start an isolated letter-music session and pause global music.
+ * Returns the managed audio element, or null when no track is configured.
+ */
+export function startLetterMusic(src) {
+  stopLetterMusic({ restoreGlobal: false });
+  resumeGlobalAfterLetter = isGlobalMusicPlaying();
+  pauseGlobalMusic(true);
+
+  if (!src) return null;
+
+  letterAudioElement = new Audio();
+  letterAudioElement.loop = true;
+  letterAudioElement.preload = 'metadata';
+  letterAudioElement.volume = 0.45;
+  letterAudioElement.src = src;
+
+  const attempt = letterAudioElement.play();
+  attempt?.catch(() => {
+    // A visible play button remains available when autoplay is blocked or media is missing.
+  });
+  return letterAudioElement;
+}
+
+/** Stop and discard letter music, optionally restoring the previous global track. */
+export function stopLetterMusic({ restoreGlobal = true } = {}) {
+  if (letterAudioElement) {
+    letterAudioElement.pause();
+    letterAudioElement.removeAttribute('src');
+    letterAudioElement.load();
+    letterAudioElement = null;
+  }
+
+  if (restoreGlobal && resumeGlobalAfterLetter && !isMuted) {
+    playGlobalMusic();
+  }
+  if (restoreGlobal) resumeGlobalAfterLetter = false;
 }
 
 /**

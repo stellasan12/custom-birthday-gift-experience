@@ -21,6 +21,7 @@ import {
   resetStorage,
 } from './storage.js';
 import { toggleMute, getMuted } from './audio.js';
+import { openLetter } from './letter-reader.js';
 
 /**
  * Render and attach event handlers for the Explore Room inside #app
@@ -399,12 +400,15 @@ function handleGiftCharacterClick(gift) {
   const configuredIds = configuredGifts.map((g) => g.id);
 
   // Mark viewed in storage
-  const { isNewView, allViewedNow } = markGiftViewed(gift.id, configuredIds);
+  const { allViewedNow } = markGiftViewed(gift.id, configuredIds);
 
   // Update DOM badge
   const cardEl = document.getElementById(`gift-card-${gift.id}`);
   if (cardEl) {
     cardEl.classList.add('is-viewed');
+    cardEl.classList.remove('gift-selected');
+    void cardEl.offsetWidth;
+    cardEl.classList.add('gift-selected');
     const badgeEl = cardEl.querySelector('.character-label-badge');
     if (badgeEl) {
       badgeEl.innerHTML = `
@@ -414,22 +418,8 @@ function handleGiftCharacterClick(gift) {
     }
   }
 
-  // Temporary preview modal as specified in Increment 2 requirements
-  openModal({
-    title: `Gift from ${gift.sender.name} 💌`,
-    bodyHTML: `
-      <div class="gift-preview-modal font-heading" style="text-align:center; padding: 15px;">
-        <img src="${gift.characterImage}" alt="${gift.characterName}" style="width: 90px; height: 90px; margin: 0 auto 12px; display: block;" />
-        <h3 style="margin-bottom: 8px; font-size: 1.3rem;">A letter from ${gift.sender.name}</h3>
-        <p style="font-family: var(--font-body); font-size: 1rem; color: var(--color-text-light); margin-bottom: 16px;">
-          "${gift.letter.preview}"
-        </p>
-        <div class="badge-pill" style="display:inline-block; background: var(--color-surface-warm); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px dashed var(--color-primary);">
-          [Full letter reader coming in the next surprise ✨]
-        </div>
-      </div>
-    `,
-  });
+  openLetter(gift.id);
+  setTimeout(() => cardEl?.classList.remove('gift-selected'), 260);
 
   // Dynamic completion check!
   if (allViewedNow) {

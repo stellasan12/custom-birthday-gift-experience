@@ -20,19 +20,6 @@ export const siteData = {
 
   /**
    * INTRO EXPERIENCE
-   *
-   * type: "slideshow" — cycles through slide images
-   *       "video"     — plays a single intro video
-   *
-   * slides: Array of image paths (used when type is "slideshow").
-   *         Place your images in /public/images/ and reference them
-   *         as "/images/your-file.jpg".
-   *
-   * video:  Path to an intro video (used when type is "video").
-   *         Place the video in /public/video/ and reference it
-   *         as "/video/your-file.mp4".
-   *
-   * slideDuration: Milliseconds each slide is shown (default 3000).
    */
   intro: {
     type: "slideshow",
@@ -47,12 +34,6 @@ export const siteData = {
 
   /**
    * HOMEPAGE
-   *
-   * characterImage: Path to the main birthday character artwork.
-   *                 Place your image in /public/images/ and update the path.
-   *
-   * greeting: The big headline shown on the homepage.
-   * subGreeting: Secondary text below the headline.
    */
   homepage: {
     characterImage: "/images/placeholders/birthday-character.svg",
@@ -62,16 +43,117 @@ export const siteData = {
 
   /**
    * AUDIO
-   *
-   * globalBackgroundMusic: Path to the background music MP3.
-   *                        Place your audio in /public/audio/background/
-   *                        and update this path.
-   *
-   * Note: Browser autoplay restrictions mean music will only start
-   * after the user's first interaction with the page.
    */
   audio: {
     globalBackgroundMusic: "/audio/background/general-bgm.mp3",
-    defaultVolume: 0.4
+    defaultVolume: 0.4,
   },
+
+  /**
+   * EXPLORE ROOM & GIFTS
+   */
+  explore: {
+    clickMePrompt: "CLICK ME 🎁",
+    revealText: "Some people left a little something for you... 💌",
+  },
+
+  /**
+   * GIFTS CAROUSEL CONFIGURATION
+   * Add or edit gift objects here.
+   */
+  gifts: [
+    {
+      id: "gift-01",
+      characterName: "Teddy Bear",
+      characterImage: "/images/placeholders/birthday-character.svg",
+      sender: {
+        name: "Alex & Sam",
+        photo: "/images/placeholders/intro-01.svg",
+      },
+      letter: {
+        preview: "Happy Birthday! Wishing you all the happiness and warmth in the world!",
+        music: "/audio/letters/gift-01.mp3",
+      },
+    },
+    {
+      id: "gift-02",
+      characterName: "Sparkle Bunny",
+      characterImage: "/images/placeholders/intro-01.svg",
+      sender: {
+        name: "Mia",
+        photo: "/images/placeholders/intro-01.svg",
+      },
+      letter: {
+        preview: "To the sweetest celebrant ever — keep shining bright!",
+        music: "/audio/letters/gift-02.mp3",
+      },
+    },
+    {
+      id: "gift-03",
+      characterName: "Party Balloon",
+      characterImage: "/images/placeholders/intro-02.svg",
+      sender: {
+        name: "Chris & Family",
+        photo: "/images/placeholders/intro-02.svg",
+      },
+      letter: {
+        preview: "Happy Birthday! Hope your special day is filled with love and cake!",
+        music: "/audio/letters/gift-03.mp3",
+      },
+    },
+    {
+      id: "gift-04",
+      characterName: "Mystery Box",
+      characterImage: "/images/placeholders/intro-03.svg",
+      sender: {
+        name: "Taylor",
+        photo: "/images/placeholders/intro-03.svg",
+      },
+      letter: {
+        preview: "Surprise! A little token of appreciation for being awesome.",
+        music: "/audio/letters/gift-04.mp3",
+      },
+    },
+    {
+      id: "gift-05",
+      characterName: "Star Cake",
+      characterImage: "/images/placeholders/birthday-character.svg",
+      sender: {
+        name: "Jordan",
+        photo: "/images/placeholders/birthday-character.svg",
+      },
+      letter: {
+        preview: "Make a wish! May all your dreams come true this year.",
+        music: "/audio/letters/gift-05.mp3",
+      },
+    },
+  ],
+
+  /**
+   * DECORATIVE INTERACTIVE STICKERS
+   */
+  stickers: [
+    {
+      id: "flower",
+      type: "petals",
+      image: "/images/placeholders/intro-01.svg",
+      label: "Magic Flower 🌸",
+      tooltip: "Click for petal shower magic!",
+    },
+    {
+      id: "standee",
+      type: "video",
+      image: "/images/placeholders/birthday-character.svg",
+      video: "/video/standee-placeholder.mp4",
+      label: "Star Standee ⭐",
+      tooltip: "Click to watch special message video!",
+    },
+    {
+      id: "poster",
+      type: "music",
+      image: "/images/placeholders/intro-03.svg",
+      label: "Music Poster 🎵",
+      tooltip: "Click to toggle background music!",
+    },
+  ],
 };

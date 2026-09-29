@@ -17,6 +17,7 @@ import {
   getMuted,
   onStateChange,
 } from './audio.js';
+import { renderExploreRoom } from './explore.js';
 
 // ── Constants ──
 const INTRO_FADE_MS = 800;
@@ -316,23 +317,16 @@ function setupCTA() {
 }
 
 /**
- * Placeholder handler for the Explore CTA.
- * The full gift room will be implemented in Increment 2.
+ * Transition to Explore Room on CTA click.
  */
 function handleExploreGift() {
-  const msgEl = document.getElementById('placeholder-msg');
-  if (!msgEl) return;
+  const appEl = document.getElementById('app');
+  if (!appEl) return;
 
-  // Don't re-trigger if already visible
-  if (msgEl.classList.contains('visible')) return;
-
-  msgEl.textContent = '🎁 The gift room is being prepared — coming in the next update! ✨';
-  msgEl.classList.add('visible');
-
-  // Hide after a few seconds
-  setTimeout(() => {
-    msgEl.classList.remove('visible');
-  }, 4000);
+  // Render Explore Room; returning Home restarts the intro & homepage experience!
+  renderExploreRoom(appEl, () => {
+    initApp();
+  });
 }
 
 // ═════════════════════════════════════════════════

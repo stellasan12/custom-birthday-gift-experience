@@ -78,6 +78,15 @@ export function initAudio() {
   document.addEventListener('click', interactionHandler, { capture: true, passive: true });
   document.addEventListener('keydown', interactionHandler, { capture: true, passive: true });
   document.addEventListener('touchstart', interactionHandler, { capture: true, passive: true });
+
+  // Throughout the system, double-clicking toggles BGM play/pause
+  document.addEventListener('dblclick', () => {
+    if (!hasUserInteracted) {
+      hasUserInteracted = true;
+      removeInteractionListeners();
+    }
+    toggleMute();
+  });
 }
 
 function removeInteractionListeners() {

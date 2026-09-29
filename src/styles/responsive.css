@@ -3,8 +3,8 @@
    Mobile-first adjustments for key breakpoints
    ═══════════════════════════════════════════════ */
 
-/* ── Small phones (≤ 380px) ── */
-@media (max-width: 380px) {
+/* ── Small phones (≤ 480px) ── */
+@media (max-width: 480px) {
   .homepage {
     padding: var(--space-md) var(--space-sm);
   }
@@ -17,6 +17,43 @@
   .intro__skip {
     font-size: 0.8rem;
     padding: 6px 12px;
+  }
+
+  /* Explore Header Mobile Layout */
+  .explore-header {
+    padding: 8px 12px;
+    margin: 8px;
+    gap: 8px;
+  }
+
+  .nav-title {
+    display: none; /* Hide long celebrant title on small mobile to prevent overflow */
+  }
+
+  .header-nav {
+    gap: 6px;
+  }
+
+  .nav-link-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .nav-label {
+    font-size: 0.75rem;
+  }
+
+  .sticker-flower { top: 4%; left: 2%; }
+  .sticker-standee { bottom: 4%; right: 2%; }
+  .sticker-poster { top: 4%; right: 2%; }
+
+  .carousel-track {
+    padding: 12px 20px;
+    gap: 16px;
+  }
+
+  .gift-character-card {
+    flex: 0 0 170px;
   }
 }
 

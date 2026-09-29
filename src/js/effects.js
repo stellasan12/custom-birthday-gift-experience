@@ -1,8 +1,8 @@
 /**
  * Visual Effects — Birthday Gift Experience
  *
- * Confetti burst and any future celebratory effects.
- * Uses a <canvas> element for performance.
+ * Confetti burst and petal shower effects.
+ * Uses <canvas> elements for smooth performance.
  */
 
 /** Whether the user prefers reduced motion */
@@ -31,7 +31,6 @@ export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);
 
-  // Resize handler for during the animation
   const onResize = () => {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
@@ -50,16 +49,15 @@ export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
 
   const shapes = ['rect', 'circle', 'strip'];
 
-  // Create particles that burst from centre-top, fanning outward
   const particles = Array.from({ length: particleCount }, () => {
-    const angle = (Math.random() * Math.PI) - (Math.PI / 2); // -90° to +90°
+    const angle = Math.random() * Math.PI - Math.PI / 2;
     const speed = 4 + Math.random() * 8;
 
     return {
       x: width / 2,
       y: height * 0.35,
       vx: Math.cos(angle) * speed * (1 + Math.random()),
-      vy: Math.sin(angle) * speed - (3 + Math.random() * 4), // upward bias
+      vy: Math.sin(angle) * speed - (3 + Math.random() * 4),
       width: 6 + Math.random() * 6,
       height: 4 + Math.random() * 10,
       color: colors[Math.floor(Math.random() * colors.length)],
@@ -79,23 +77,19 @@ export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
     const progress = Math.min(elapsed / duration, 1);
 
     ctx.clearRect(0, 0, width, height);
-
     let aliveCount = 0;
 
     for (const p of particles) {
-      // Physics
       p.vy += p.gravity;
       p.vx *= p.friction;
       p.x += p.vx;
       p.y += p.vy;
       p.rotation += p.rotationSpeed;
 
-      // Fade out during the last 40% of the animation
       if (progress > 0.6) {
-        p.opacity = Math.max(0, 1 - ((progress - 0.6) / 0.4));
+        p.opacity = Math.max(0, 1 - (progress - 0.6) / 0.4);
       }
 
-      // Skip if invisible or off-screen
       if (p.opacity <= 0 || p.y > height + 50) continue;
       aliveCount++;
 
@@ -112,7 +106,6 @@ export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
         ctx.arc(0, 0, p.width / 2, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        // Strip / ribbon
         ctx.fillRect(-p.width / 2, -1, p.width, 3);
       }
 
@@ -122,7 +115,92 @@ export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
     if (progress < 1 && aliveCount > 0) {
       requestAnimationFrame(animate);
     } else {
-      // Cleanup
+      window.removeEventListener('resize', onResize);
+      canvas.remove();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+/**
+ * Shower gentle falling flower petals across the screen.
+ * @param {object} [options]
+ * @param {number} [options.count=35]
+ * @param {number} [options.duration=4000]
+ */
+export function showerPetals({ count = 35, duration = 4000 } = {}) {
+  if (prefersReducedMotion) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'confetti-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
+
+  const onResize = () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  };
+  window.addEventListener('resize', onResize);
+
+  const petalColors = ['#FFC0CB', '#FFB6C1', '#FF69B4', '#FFA07A', '#E6E6FA'];
+
+  const petals = Array.from({ length: count }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * -height,
+    size: 8 + Math.random() * 8,
+    speedY: 1.5 + Math.random() * 2,
+    sway: Math.random() * Math.PI * 2,
+    swaySpeed: 0.02 + Math.random() * 0.03,
+    color: petalColors[Math.floor(Math.random() * petalColors.length)],
+    rotation: Math.random() * Math.PI * 2,
+    rotationSpeed: (Math.random() - 0.5) * 0.05,
+    opacity: 0.9,
+  }));
+
+  const startTime = performance.now();
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    ctx.clearRect(0, 0, width, height);
+    let aliveCount = 0;
+
+    for (const p of petals) {
+      p.y += p.speedY;
+      p.sway += p.swaySpeed;
+      p.x += Math.sin(p.sway) * 1.5;
+      p.rotation += p.rotationSpeed;
+
+      if (progress > 0.7) {
+        p.opacity = Math.max(0, 1 - (progress - 0.7) / 0.3);
+      }
+
+      if (p.opacity <= 0 || p.y > height + 20) continue;
+      aliveCount++;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+
+      // Draw organic petal shape
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size / 2, p.size, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    if (progress < 1 && aliveCount > 0) {
+      requestAnimationFrame(animate);
+    } else {
       window.removeEventListener('resize', onResize);
       canvas.remove();
     }

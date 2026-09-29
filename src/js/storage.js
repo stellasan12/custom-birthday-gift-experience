@@ -7,11 +7,22 @@
 
 const STORAGE_KEY = 'birthdayGiftExperience';
 
+export const DEFAULT_SETTINGS = Object.freeze({
+  theme: 'birthday',
+  fontSize: 'normal',
+  volume: 0.7,
+  muted: false,
+});
+
+const THEMES = new Set(['birthday', 'lavender', 'peach', 'mint']);
+const FONT_SIZES = new Set(['small', 'normal', 'large', 'extra-large']);
+
 const defaultState = {
   hasRevealedGifts: false,
   viewedGiftIds: [],
   allGiftsViewed: false,
   annotations: {},
+  settings: DEFAULT_SETTINGS,
   gallery: {
     preferredView: 'gallery',
     photoComments: {},
@@ -20,6 +31,17 @@ const defaultState = {
     photoOrder: {},
   },
 };
+
+function sanitizeSettings(value) {
+  const settings = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const volume = Number(settings.volume);
+  return {
+    theme: THEMES.has(settings.theme) ? settings.theme : DEFAULT_SETTINGS.theme,
+    fontSize: FONT_SIZES.has(settings.fontSize) ? settings.fontSize : DEFAULT_SETTINGS.fontSize,
+    volume: Number.isFinite(volume) ? Math.max(0, Math.min(1, volume)) : DEFAULT_SETTINGS.volume,
+    muted: typeof settings.muted === 'boolean' ? settings.muted : DEFAULT_SETTINGS.muted,
+  };
+}
 
 function sanitizeGallery(value) {
   const gallery = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
@@ -64,7 +86,7 @@ function sanitizeAnnotations(value) {
 export function getStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...defaultState };
+    if (!raw) return { ...defaultState, settings: { ...DEFAULT_SETTINGS } };
     const parsed = JSON.parse(raw);
     return {
       hasRevealedGifts: Boolean(parsed.hasRevealedGifts),
@@ -74,10 +96,11 @@ export function getStorage() {
       allGiftsViewed: Boolean(parsed.allGiftsViewed ?? parsed.unlockedAll),
       annotations: sanitizeAnnotations(parsed.annotations),
       gallery: sanitizeGallery(parsed.gallery),
+      settings: sanitizeSettings(parsed.settings),
     };
   } catch (err) {
     console.warn('[Storage] Failed to read from localStorage:', err);
-    return { ...defaultState };
+    return { ...defaultState, settings: { ...DEFAULT_SETTINGS } };
   }
 }
 
@@ -198,6 +221,19 @@ export function getPhotoComments(photoId) {
 export function savePhotoComments(photoId, comments) {
   const gallery = getGalleryState();
   return saveGalleryState({ photoComments: { ...gallery.photoComments, [photoId]: comments } });
+}
+
+export function getSettings() {
+  return { ...getStorage().settings };
+}
+
+export function saveSettings(updates) {
+  const state = getStorage();
+  return saveStorage({ settings: sanitizeSettings({ ...state.settings, ...updates }) }).settings;
+}
+
+export function resetSettings() {
+  return saveStorage({ settings: { ...DEFAULT_SETTINGS } }).settings;
 }
 
 /**

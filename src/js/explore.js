@@ -11,24 +11,24 @@
 
 import { siteData } from '../data/content.js';
 import { burstConfetti, showerPetals } from './effects.js';
-import { openModal, closeModal } from './modal.js';
+import { openModal } from './modal.js';
 import {
   isGiftsRevealed,
   setGiftsRevealed,
   isGiftViewed,
   markGiftViewed,
   isAllUnlocked,
-  resetStorage,
 } from './storage.js';
 import { toggleMute, getMuted } from './audio.js';
 import { openLetter } from './letter-reader.js';
+import { openSettings } from './settings.js';
 
 /**
  * Render and attach event handlers for the Explore Room inside #app
  * @param {HTMLElement} container
  * @param {() => void} onGoHome - Callback to return to homepage
  */
-export function renderExploreRoom(container, onGoHome, onOpenGallery) {
+export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLetters) {
   const configuredGifts = siteData.gifts || [];
   const configuredGiftIds = configuredGifts.map((gift) => gift.id);
   const allUnlocked = isAllUnlocked(configuredGiftIds);
@@ -161,47 +161,15 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery) {
   const lettersBtn = document.getElementById('nav-letters-btn');
   lettersBtn?.addEventListener('click', () => {
     if (isAllUnlocked(configuredGiftIds)) {
-      openModal({
-        title: '💌 Letter Collection',
-        bodyHTML: `<p>Your letter collection has been unlocked! Full letter reader coming soon ✨</p>`,
-      });
+      onOpenLetters?.();
     } else {
       triggerLockedFeedback(lettersBtn, 'Secret nganiiiii! Access all gifts first 🔒');
     }
   });
 
-  // Navigation: Settings & Reset Progress
+  // Settings preserves sentimental content and resets preferences only.
   const settingsBtn = document.getElementById('nav-settings-btn');
-  settingsBtn?.addEventListener('click', () => {
-    openModal({
-      title: '⚙️ Settings',
-      bodyHTML: `
-        <div style="text-align: center; padding: 10px;">
-          <p style="margin-bottom: 12px; font-weight: 600;">Customization controls coming soon!</p>
-          <p style="font-size: 0.85rem; opacity: 0.85; margin-bottom: 20px;">You will be able to change themes, music, and display preferences here in a future update.</p>
-          <hr style="border: 0; border-top: 1px dashed var(--color-border); margin: 16px 0;" />
-          <button id="reset-progress-btn" class="nav-link-btn" style="margin: 0 auto; background: #FFF0EB; border-color: var(--color-primary); color: #D9534F;">
-            🔄 Reset All Progress
-          </button>
-        </div>
-      `,
-    });
-
-    setTimeout(() => {
-      document.getElementById('reset-progress-btn')?.addEventListener('click', () => {
-        resetStorage();
-        closeModal();
-        showToast('Progress reset! Restarting experience... 🔄');
-        setTimeout(() => {
-          if (onGoHome) {
-            onGoHome();
-          } else {
-            location.reload();
-          }
-        }, 400);
-      });
-    }, 50);
-  });
+  settingsBtn?.addEventListener('click', openSettings);
 
   // ── Sticker Interactions ──
   stickers.forEach((sticker) => {

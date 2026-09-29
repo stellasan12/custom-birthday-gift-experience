@@ -11,6 +11,9 @@
  */
 
 import { siteData } from '../data/content.js';
+import { getSettings, saveSettings } from './storage.js';
+
+const initialSettings = getSettings();
 
 /** @type {HTMLAudioElement | null} */
 let bgmElement = null;
@@ -22,10 +25,10 @@ let hasUserInteracted = false;
 let bgmRequested = false;
 
 /** Whether the user has explicitly muted via the toggle button */
-let isMuted = false;
+let isMuted = initialSettings.muted;
 
 /** Current target volume (0–1) */
-let targetVolume = siteData.audio.defaultVolume ?? 0.4;
+let targetVolume = initialSettings.volume;
 
 /** Duration for fade transitions in ms */
 const FADE_DURATION = 800;
@@ -34,7 +37,11 @@ const FADE_DURATION = 800;
 let fadeInterval = null;
 
 /** Callback for UI updates when mute/play state changes */
-let onStateChangeCallback = null;
+const stateChangeCallbacks = new Set();
+
+function notifyState() {
+  stateChangeCallbacks.forEach((callback) => callback(isMuted, targetVolume));
+}
 
 // ── Interaction listener references (for cleanup) ──
 let interactionHandler = null;
@@ -139,7 +146,7 @@ function fadeIn() {
   }, stepTime);
 
   // Notify UI that music is now playing
-  if (onStateChangeCallback) onStateChangeCallback(false);
+  notifyState();
 }
 
 /**
@@ -212,11 +219,16 @@ export function pauseGlobalMusic(immediate = false) {
  */
 export function setVolume(val) {
   targetVolume = Math.max(0, Math.min(1, val));
+  saveSettings({ volume: targetVolume });
   // Only set directly if not mid-fade
   if (!fadeInterval && bgmElement && !bgmElement.paused) {
     bgmElement.volume = targetVolume;
   }
+  if (letterAudioElement) letterAudioElement.volume = targetVolume;
+  notifyState();
 }
+
+export function getVolume() { return targetVolume; }
 
 /**
  * Set muted state — called by the audio toggle button.
@@ -224,17 +236,18 @@ export function setVolume(val) {
  * @param {boolean} muted
  */
 export function setMuted(muted) {
-  isMuted = muted;
+  isMuted = Boolean(muted);
+  saveSettings({ muted: isMuted });
 
-  if (!bgmElement) return;
+  if (letterAudioElement) letterAudioElement.muted = isMuted;
 
-  if (muted) {
+  if (bgmElement && muted) {
     fadeOut();
-  } else if (bgmRequested && hasUserInteracted) {
+  } else if (bgmElement && bgmRequested && hasUserInteracted) {
     fadeIn();
   }
 
-  if (onStateChangeCallback) onStateChangeCallback(isMuted);
+  notifyState();
 }
 
 /**
@@ -275,7 +288,8 @@ export function startLetterMusic(src) {
   letterAudioElement = new Audio();
   letterAudioElement.loop = true;
   letterAudioElement.preload = 'metadata';
-  letterAudioElement.volume = 0.45;
+  letterAudioElement.volume = targetVolume;
+  letterAudioElement.muted = isMuted;
   letterAudioElement.src = src;
 
   const attempt = letterAudioElement.play();
@@ -305,5 +319,6 @@ export function stopLetterMusic({ restoreGlobal = true } = {}) {
  * @param {(muted: boolean) => void} cb
  */
 export function onStateChange(cb) {
-  onStateChangeCallback = cb;
+  stateChangeCallbacks.add(cb);
+  return () => stateChangeCallbacks.delete(cb);
 }

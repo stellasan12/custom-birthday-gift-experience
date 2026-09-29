@@ -9,8 +9,13 @@ import './styles/main.css';
 import './styles/animations.css';
 import './styles/responsive.css';
 import './styles/gallery.css';
+import './styles/increment5.css';
 
 import { initApp } from './js/app.js';
+import { applySettings } from './js/settings.js';
+
+// Apply persisted palette and reading scale before the application renders.
+applySettings();
 
 // Boot once the DOM is ready
 if (document.readyState === 'loading') {

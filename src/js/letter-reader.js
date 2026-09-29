@@ -2,7 +2,7 @@
 
 import { siteData } from '../data/content.js';
 import { openModal } from './modal.js';
-import { startLetterMusic, stopLetterMusic } from './audio.js';
+import { startLetterMusic, stopLetterMusic, setVolume, getVolume, setMuted, getMuted } from './audio.js';
 import { getGiftAnnotations, saveGiftAnnotations } from './storage.js';
 import {
   ANNOTATION_COLORS,
@@ -50,7 +50,7 @@ export function openLetter(giftId) {
           <button type="button" class="letter-music-play" aria-label="Play letter music">▶</button>
           <button type="button" class="letter-music-mute" aria-label="Mute letter music">🔊</button>
           <label class="letter-volume-label">Volume
-            <input class="letter-volume" type="range" min="0" max="1" step="0.05" value="0.45" aria-label="Letter music volume">
+            <input class="letter-volume" type="range" min="0" max="1" step="0.05" value="${getVolume()}" aria-label="Master music volume">
           </label>
           <span class="letter-music-status" role="status"></span>
         </section>
@@ -402,10 +402,9 @@ function setupMusic(modal, source) {
     if (audio.paused) audio.play().catch(() => { status.textContent = 'Tap play when you are ready'; });
     else audio.pause();
   });
-  mute.addEventListener('click', () => { audio.muted = !audio.muted; sync(); });
+  mute.addEventListener('click', () => { setMuted(!getMuted()); sync(); });
   volume.addEventListener('input', () => {
-    audio.volume = Number(volume.value);
-    if (audio.volume > 0) audio.muted = false;
+    setVolume(Number(volume.value));
     sync();
   });
   sync();

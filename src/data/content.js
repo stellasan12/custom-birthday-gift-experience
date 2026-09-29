@@ -65,10 +65,10 @@ export const siteData = {
     {
       id: "gift-01",
       characterName: "Teddy Bear",
-      characterImage: "/images/placeholders/birthday-character.svg",
+      characterImage: "/images/stickers/holding-letter-1.png",
       sender: {
         name: "Alex & Sam",
-        photo: "/images/placeholders/intro-01.svg",
+        photo: "/images/stickers/holding-letter-1.png",
       },
       letter: {
         preview: "Happy Birthday! Wishing you all the happiness and warmth in the world!",
@@ -78,10 +78,10 @@ export const siteData = {
     {
       id: "gift-02",
       characterName: "Sparkle Bunny",
-      characterImage: "/images/placeholders/intro-01.svg",
+      characterImage: "/images/stickers/holding-letter-2.png",
       sender: {
         name: "Mia",
-        photo: "/images/placeholders/intro-01.svg",
+        photo: "/images/stickers/holding-letter-2.png",
       },
       letter: {
         preview: "To the sweetest celebrant ever — keep shining bright!",
@@ -91,10 +91,10 @@ export const siteData = {
     {
       id: "gift-03",
       characterName: "Party Balloon",
-      characterImage: "/images/placeholders/intro-02.svg",
+      characterImage: "/images/stickers/holding-gift.png",
       sender: {
         name: "Chris & Family",
-        photo: "/images/placeholders/intro-02.svg",
+        photo: "/images/stickers/holding-gift.png",
       },
       letter: {
         preview: "Happy Birthday! Hope your special day is filled with love and cake!",
@@ -104,10 +104,10 @@ export const siteData = {
     {
       id: "gift-04",
       characterName: "Mystery Box",
-      characterImage: "/images/placeholders/intro-03.svg",
+      characterImage: "/images/stickers/holding-letter-1.png",
       sender: {
         name: "Taylor",
-        photo: "/images/placeholders/intro-03.svg",
+        photo: "/images/stickers/holding-letter-1.png",
       },
       letter: {
         preview: "Surprise! A little token of appreciation for being awesome.",
@@ -117,10 +117,10 @@ export const siteData = {
     {
       id: "gift-05",
       characterName: "Star Cake",
-      characterImage: "/images/placeholders/birthday-character.svg",
+      characterImage: "/images/stickers/holding-letter-2.png",
       sender: {
         name: "Jordan",
-        photo: "/images/placeholders/birthday-character.svg",
+        photo: "/images/stickers/holding-letter-2.png",
       },
       letter: {
         preview: "Make a wish! May all your dreams come true this year.",
@@ -136,21 +136,31 @@ export const siteData = {
     {
       id: "flower",
       type: "petals",
-      image: "/images/placeholders/intro-01.svg",
-      tooltip: "Click for petal shower magic!",
+      label: "Flower",
+      image: "/images/stickers/flower-on-the-floor.png",
+      //tooltip: "Click for petal shower magic!",
     },
     {
       id: "standee",
       type: "video",
-      image: "/images/placeholders/birthday-character.svg",
+      label: "Seventeen Mingyu",
+      image: "/images/stickers/standee.png",
       video: "/video/standee-placeholder.mp4",
-      tooltip: "Click to watch special message video!",
+      //tooltip: "Click to watch special message video!",
     },
     {
       id: "poster",
       type: "music",
-      image: "/images/placeholders/intro-03.svg",
-      tooltip: "Click to toggle background music!",
+      label: "Demon Slayer",
+      image: "/images/stickers/poster.png",
+      //tooltip: "Click to toggle background music!",
+    },
+    {
+      id: "custom-object",
+      type: "custom",
+      label: "Ezer",
+      image: "/images/stickers/holding-letter-1.png",
+      //tooltip: "Click to change or add object!",
     },
   ],
 };

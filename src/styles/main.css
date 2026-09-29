@@ -702,46 +702,155 @@ svg {
 }
 
 /* ═══════════════════════════════════════════════
-   ROOM CENTER — Flex layout for stickers + click me
-   Adjust margin-top on .room-side items to move stickers up/down
+   ROOM STAGE & FLOOR LAYOUT (Standing Together)
    ═══════════════════════════════════════════════ */
-.room-center {
+.room-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1220px;
+  min-height: 380px;
+  margin: 0 auto;
+  padding: 90px 50px 100px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: var(--radius-large);
+  /* Aesthetic room wall background with cozy gradient and floor line */
+  background:
+    linear-gradient(180deg,
+      rgba(255, 246, 248, 0.6) 0%,
+      rgba(255, 238, 242, 0.8) 72%,
+      rgba(248, 218, 226, 0.95) 72.5%,
+      rgba(245, 208, 218, 0.85) 100%);
+  box-shadow: var(--shadow-medium);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  overflow: visible;
+}
+
+/* Poster hanging high on the right wall behind standee */
+.room-wall-poster {
+  position: absolute;
+  top: 50px;
+  right: 145px;
+  z-index: 2;
+}
+
+.room-wall-poster .sticker-img {
+  width: clamp(100px, 14vw, 150px);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.15));
+}
+
+/* Floor Row: All items standing together on floor baseline */
+.room-floor-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  z-index: 4;
+}
+
+.room-floor-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  gap: 16px;
+  justify-content: flex-end;
 }
 
-.room-top-row {
-  display: flex;
-  justify-content: center;
-  /* ↓ Nudge poster sticker up/down with margin */
-  margin-bottom: -8px;
-  margin-left: 300px;
+/* 1. Flower: In front of custom sticker (z-index 8) */
+.item-flower {
+  position: relative;
+  z-index: 8;
+  margin-right: -60px;
 }
 
-.room-main-row {
+.item-flower .sticker-img {
+  width: clamp(80px, 11vw, 200px);
+  margin-bottom: -50px;
+}
+
+/* 2. Custom Object (Ezer): Behind flower (8) & behind penguin (10) (z-index 4) */
+.item-custom-object {
+  position: relative;
+  z-index: 4;
+  margin-right: -45px;
+}
+
+.item-custom-object .sticker-img {
+  width: clamp(110px, 15vw, 250px);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
+  margin-bottom: -15px;
+  margin-right: -20px;
+}
+
+/* 3. Penguin (CLICK ME): VERY FRONT (z-index 10) */
+.item-penguin,
+.click-me-section {
+  position: relative;
+  z-index: 10;
+}
+
+/* 4. Standee (Mingyu): Behind penguin (10) (z-index 5) */
+.item-standee {
+  position: relative;
+  z-index: 4;
+  margin-left: -45px;
+}
+
+.item-standee .sticker-img {
+  width: clamp(120px, 16vw, 190px);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
+  margin-bottom: -15px;
+}
+
+
+/* Black Box Placeholder matching user sketch */
+.sticker-placeholder-box {
+  width: clamp(75px, 10vw, 110px);
+  height: clamp(140px, 18vw, 200px);
+  border: 2.5px dashed #222222;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.03);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(20px, 5vw, 60px);
-  width: 100%;
+  margin-bottom: 10px;
+  transition: all var(--transition-fast);
+  cursor: pointer;
 }
 
-.room-side {
+.sticker-placeholder-box:hover {
+  background: rgba(244, 160, 181, 0.15);
+  border-color: var(--color-primary);
+  transform: scale(1.03);
+}
+
+.placeholder-box-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  /* ↓ Adjust margin-top to move stickers up/down within the row */
-  margin-top: 0;
+  gap: 6px;
+  color: #555;
+  font-weight: 600;
+}
+
+.placeholder-plus {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: #333;
+}
+
+.placeholder-label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  text-align: center;
 }
 
 .sticker-btn {
   background: transparent;
   border: none;
   cursor: pointer;
+  pointer-events: auto;
   transition: transform var(--transition-fast);
 }
 
@@ -753,8 +862,7 @@ svg {
 }
 
 .sticker-img {
-  width: clamp(65px, 9vw, 100px);
-  height: clamp(65px, 9vw, 100px);
+  width: clamp(65px, 9vw, 120px);
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
   transition: transform var(--transition-fast);
 }
@@ -771,10 +879,11 @@ svg {
    CENTERPIECE: CLICK ME OBJECT
    ═══════════════════════════════════════════════ */
 .click-me-section {
+  position: relative;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 40px 0;
   transition: opacity var(--transition-medium), transform var(--transition-medium);
 }
 
@@ -788,6 +897,9 @@ svg {
   background: transparent;
   border: none;
   cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
 }
 
 .click-me-box {
@@ -799,10 +911,10 @@ svg {
 }
 
 .click-me-img {
-  width: clamp(140px, 20vw, 220px);
-  height: clamp(140px, 20vw, 220px);
+  width: clamp(140px, 20vw, 320px);
   filter: drop-shadow(0 10px 25px rgba(244, 160, 181, 0.4));
   transition: transform var(--transition-fast);
+  margin-bottom: -35px;
 }
 
 .click-me-btn:hover .click-me-img {
@@ -811,7 +923,7 @@ svg {
 
 .click-me-badge {
   position: absolute;
-  bottom: -15px;
+  bottom: -40px;
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   color: #FFFFFF;
   padding: 8px 24px;

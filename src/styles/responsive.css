@@ -5,6 +5,8 @@
 
 /* ── Small phones (≤ 480px) ── */
 @media (max-width: 480px) {
+  .room-sticker-top-left { top:18px;left:18px; }
+  .room-sticker-top-left .sticker-img { width:72px; }
   .homepage {
     padding: var(--space-md) var(--space-sm);
   }

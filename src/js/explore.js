@@ -19,9 +19,11 @@ import {
   markGiftViewed,
   isAllUnlocked,
 } from './storage.js';
-import { toggleMute, getMuted } from './audio.js';
+import { toggleMute, getMuted, toggleStickerMusic } from './audio.js';
 import { openLetter } from './letter-reader.js';
 import { openSettings } from './settings.js';
+
+const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
 
 /**
  * Render and attach event handlers for the Explore Room inside #app
@@ -42,7 +44,7 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
         <div class="header-left">
           <button id="nav-home-btn" class="nav-brand-btn" aria-label="Return to Homepage">
             <span class="nav-logo-icon">🏠</span>
-            <span class="nav-title font-heading">${siteData.celebrant.name}</span>
+            <span class="nav-title font-heading">${escapeHTML(siteData.celebrant.name)}</span>
           </button>
         </div>
 
@@ -77,21 +79,21 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
 
         <!-- ROOM STAGE: Cozy bedroom background with wall poster & floor baseline -->
         <div class="room-stage card-glass">
-          <!-- Poster hanging on top-right wall behind/above standee -->
           <div class="room-wall-poster">
-            ${stickers.filter(s => s.id === 'poster').map(s => renderStickerHTML(s)).join('')}
+            ${stickers.filter((sticker) => getStickerPosition(sticker) === 'top-right').map(renderStickerHTML).join('')}
+          </div>
+          <div class="room-sticker-top-left">
+            ${stickers.filter((sticker) => getStickerPosition(sticker) === 'top-left').map(renderStickerHTML).join('')}
           </div>
 
           <!-- Floor Row: Objects standing together on the room floor -->
           <div class="room-floor-row">
-            <!-- Flower bouquet on bottom left -->
             <div class="room-floor-item item-flower">
-              ${stickers.filter(s => s.id === 'flower').map(s => renderStickerHTML(s)).join('')}
+              ${stickers.filter((sticker) => getStickerPosition(sticker) === 'bottom-left').map(renderStickerHTML).join('')}
             </div>
 
-            <!-- Custom Object Sticker (Ezer) -->
             <div class="room-floor-item item-custom-object">
-              ${stickers.filter(s => s.id === 'custom-object').map(s => renderStickerHTML(s)).join('')}
+              ${stickers.filter((sticker) => getStickerPosition(sticker) === 'side-left').map(renderStickerHTML).join('')}
             </div>
 
             <!-- CENTERPIECE: CLICK ME PENGUIN -->
@@ -104,10 +106,10 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
               </button>
             </section>
 
-            <!-- Standee (Mingyu) standing right next to Penguin -->
             <div class="room-floor-item item-standee">
-              ${stickers.filter(s => s.id === 'standee').map(s => renderStickerHTML(s)).join('')}
+              ${stickers.filter((sticker) => ['bottom-right', 'side-right'].includes(getStickerPosition(sticker))).map(renderStickerHTML).join('')}
             </div>
+
           </div>
         </div>
 
@@ -183,11 +185,11 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
       } else if (sticker.type === 'video') {
         openVideoModal(sticker);
       } else if (sticker.type === 'music') {
-        const isMutedNow = toggleMute();
-        audioBtn.textContent = isMutedNow ? '🔇' : '🔊';
-        showToast(isMutedNow ? 'Background music paused 🎵' : 'Background music playing 🎵');
+        const playing = toggleStickerMusic(sticker.music || sticker.media);
+        audioBtn.textContent = getMuted() ? '🔇' : '🔊';
+        showToast(playing ? 'Sticker music playing 🎵' : 'Background music restored 🎵');
       } else if (sticker.type === 'custom') {
-        showToast('Object slot ready! Add your image path in content.js 📦');
+        showToast('A special little keepsake 📦');
       }
     });
   });
@@ -257,7 +259,7 @@ function renderStickerHTML(sticker) {
       <button
         id="sticker-${sticker.id}"
         class="sticker-btn sticker-placeholder-box"
-        title="${sticker.tooltip || 'Add Object Later'}"
+        title="${escapeHTML(sticker.tooltip || 'Add Object Later')}"
         aria-label="Object Placeholder Box"
       >
         <div class="placeholder-box-inner">
@@ -272,11 +274,11 @@ function renderStickerHTML(sticker) {
     <button
       id="sticker-${sticker.id}"
       class="sticker-btn sticker-${sticker.id}"
-      title="${sticker.tooltip || sticker.label}"
-      aria-label="${sticker.tooltip || sticker.label}"
+      title="${escapeHTML(sticker.tooltip || sticker.label)}"
+      aria-label="${escapeHTML(sticker.tooltip || sticker.label)}"
     >
       <div class="sticker-inner">
-        <img src="${sticker.image}" alt="${sticker.label}" class="sticker-img" />
+        <img src="${escapeHTML(sticker.image)}" alt="${escapeHTML(sticker.label)}" class="sticker-img" onerror="this.closest('.sticker-btn')?.setAttribute('hidden','')" />
       </div>
     </button>
   `;
@@ -358,6 +360,12 @@ function openVideoModal(sticker) {
     video.hidden = true;
     if (fallback) fallback.style.display = 'block';
   }, { once: true });
+}
+
+function getStickerPosition(sticker) {
+  const allowed = new Set(['top-left', 'top-right', 'side-left', 'side-right', 'bottom-left', 'bottom-right']);
+  if (allowed.has(sticker.positionKey)) return sticker.positionKey;
+  return ({ flower: 'bottom-left', standee: 'bottom-right', poster: 'top-right', 'custom-object': 'side-left' })[sticker.id] || 'bottom-left';
 }
 
 function handleGiftCharacterClick(gift) {

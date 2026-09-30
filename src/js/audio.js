@@ -49,6 +49,9 @@ let interactionHandler = null;
 /** Letter music is managed here so only one secondary track can exist. */
 let letterAudioElement = null;
 let resumeGlobalAfterLetter = false;
+let stickerAudioElement = null;
+let stickerAudioSource = '';
+let resumeGlobalAfterSticker = false;
 
 /**
  * Initialise the audio system.
@@ -225,6 +228,7 @@ export function setVolume(val) {
     bgmElement.volume = targetVolume;
   }
   if (letterAudioElement) letterAudioElement.volume = targetVolume;
+  if (stickerAudioElement) stickerAudioElement.volume = targetVolume;
   notifyState();
 }
 
@@ -240,6 +244,7 @@ export function setMuted(muted) {
   saveSettings({ muted: isMuted });
 
   if (letterAudioElement) letterAudioElement.muted = isMuted;
+  if (stickerAudioElement) stickerAudioElement.muted = isMuted;
 
   if (bgmElement && muted) {
     fadeOut();
@@ -279,6 +284,7 @@ export function isGlobalMusicPlaying() {
  * Returns the managed audio element, or null when no track is configured.
  */
 export function startLetterMusic(src) {
+  stopStickerMusic({ restoreGlobal: false });
   stopLetterMusic({ restoreGlobal: false });
   resumeGlobalAfterLetter = isGlobalMusicPlaying();
   pauseGlobalMusic(true);
@@ -297,6 +303,36 @@ export function startLetterMusic(src) {
     // A visible play button remains available when autoplay is blocked or media is missing.
   });
   return letterAudioElement;
+}
+
+export function toggleStickerMusic(src) {
+  if (!src) return !toggleMute();
+  if (stickerAudioElement && stickerAudioSource === src && !stickerAudioElement.paused) {
+    stopStickerMusic();
+    return false;
+  }
+  stopStickerMusic({ restoreGlobal: false });
+  resumeGlobalAfterSticker = isGlobalMusicPlaying();
+  pauseGlobalMusic(true);
+  stickerAudioSource = src;
+  stickerAudioElement = new Audio(src);
+  stickerAudioElement.loop = true;
+  stickerAudioElement.volume = targetVolume;
+  stickerAudioElement.muted = isMuted;
+  stickerAudioElement.play().catch(() => {});
+  return true;
+}
+
+export function stopStickerMusic({ restoreGlobal = true } = {}) {
+  if (stickerAudioElement) {
+    stickerAudioElement.pause();
+    stickerAudioElement.removeAttribute('src');
+    stickerAudioElement.load();
+    stickerAudioElement = null;
+    stickerAudioSource = '';
+  }
+  if (restoreGlobal && resumeGlobalAfterSticker && !isMuted) playGlobalMusic();
+  if (restoreGlobal) resumeGlobalAfterSticker = false;
 }
 
 /** Stop and discard letter music, optionally restoring the previous global track. */

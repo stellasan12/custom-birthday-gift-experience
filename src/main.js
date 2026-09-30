@@ -13,13 +13,18 @@ import './styles/increment5.css';
 
 import { initApp } from './js/app.js';
 import { applySettings } from './js/settings.js';
+import { loadSiteContent } from './js/site-content.js';
 
 // Apply persisted palette and reading scale before the application renders.
 applySettings();
 
-// Boot once the DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
+async function boot() {
+  const app = document.getElementById('app');
+  if (app) app.innerHTML = '<div class="site-loading" role="status"><span>💌</span><p>Opening your birthday surprise...</p></div>';
+  await loadSiteContent();
   initApp();
 }
+
+// Resolve remote creator content before rendering; the service always falls back.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+else boot();

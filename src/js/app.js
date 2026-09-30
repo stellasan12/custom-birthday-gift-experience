@@ -29,6 +29,7 @@ const REVEAL_STEP_MS = 300; // delay between each homepage element
 let introTimer = null;
 let currentSlide = 0;
 let introKeyHandler = null;
+const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
 
 /**
  * Boot the entire application.
@@ -82,12 +83,16 @@ function buildIntroHTML() {
   const slides = intro.slides || [];
   const slidesHTML = slides
     .map(
-      (src, i) => `
+      (slide, i) => {
+        const src = typeof slide === 'string' ? slide : slide?.src;
+        const alt = typeof slide === 'string' ? `Intro image ${i + 1}` : (slide?.alt || `Intro image ${i + 1}`);
+        return `
       <div class="intro__slide ${i === 0 ? 'active' : ''}" data-slide="${i}">
-        <img src="${src}" alt="Intro image ${i + 1}" loading="eager"
+        <img src="${escapeHTML(src)}" alt="${escapeHTML(alt)}" loading="eager"
              onerror="this.style.display='none'">
       </div>
-    `
+    `;
+      }
     )
     .join('');
 
@@ -119,14 +124,14 @@ function buildHomepageHTML() {
   return `
     <main class="homepage" id="homepage" aria-label="Birthday homepage">
       <div class="homepage__character" id="homepage-character">
-        <img src="${homepage.characterImage}"
-             alt="Birthday character for ${celebrant.name}"
-             onerror="this.parentElement.style.display='none'">
+        <img src="${escapeHTML(homepage.characterImage)}"
+             alt="Birthday character for ${escapeHTML(celebrant.name)}"
+             onerror="if(!this.src.endsWith('/images/placeholders/birthday-character.svg')){this.src='/images/placeholders/birthday-character.svg'}else{this.parentElement.style.display='none'}">
       </div>
       <div class="homepage__greeting" id="homepage-greeting">
-        <p class="homepage__greeting-label">${homepage.greeting}</p>
-        <h1 class="homepage__greeting-name">${celebrant.name}</h1>
-        <p class="homepage__sub-greeting">${homepage.subGreeting}</p>
+        <p class="homepage__greeting-label">${escapeHTML(homepage.greeting)}</p>
+        <h1 class="homepage__greeting-name">${escapeHTML(celebrant.name)}</h1>
+        <p class="homepage__sub-greeting">${escapeHTML(homepage.subGreeting)}</p>
       </div>
       <button class="homepage__cta" id="homepage-cta" type="button">
         Explore your gift!

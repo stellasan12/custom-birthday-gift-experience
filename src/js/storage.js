@@ -222,6 +222,23 @@ export function savePhotoComments(photoId, comments) {
   return saveGalleryState({ photoComments: { ...gallery.photoComments, [photoId]: comments } });
 }
 
+export function isPhotoFavorite(photoId) {
+  return getGalleryState().favoritePhotoIds.includes(photoId);
+}
+
+export function setPhotoFavorite(photoId, favorite) {
+  const gallery = getGalleryState();
+  const ids = favorite
+    ? [...new Set([...gallery.favoritePhotoIds, photoId])]
+    : gallery.favoritePhotoIds.filter((id) => id !== photoId);
+  saveGalleryState({ favoritePhotoIds: ids });
+  return favorite;
+}
+
+export function togglePhotoFavorite(photoId) {
+  return setPhotoFavorite(photoId, !isPhotoFavorite(photoId));
+}
+
 export function getSettings() {
   return { ...getStorage().settings };
 }

@@ -343,7 +343,7 @@ function handleExploreGift() {
     const showExplore = () => renderExploreRoom(
       appEl,
       () => initApp(),
-      () => renderGallery(appEl, showExplore),
+      () => renderGallery(appEl, showExplore, () => renderLetterArchive(appEl, showExplore)),
       () => renderLetterArchive(appEl, showExplore)
     );
     showExplore();

@@ -173,4 +173,27 @@ Sender and character images are separate. Missing/broken sender images use `defa
 
 Local reactions are keyed by the Supabase letter UUID plus `letter_blocks.block_key`. Old development reactions and viewed progress using IDs such as `gift-01` are intentionally not attached to new UUIDs. Previously viewed UUIDs remain stored when new letters are published, while completion is always recalculated against the current published UUID list.
 
-Google Forms, Apps Script, submission processing, and Gallery migration are not implemented yet.
+Google Forms, Apps Script, and submission processing are not implemented yet.
+
+## Gallery management (Increment 6D)
+
+Published albums and photos are loaded once by `src/js/gallery-content.js`. Gallery, Social, and Highlight/Story views consume the same normalized album/photo objects; comments and favorites use the Supabase photo UUID as their localStorage identity.
+
+### Creator workflow
+
+1. Create an `albums` row with the current `gift_site_id`, title, optional description/cover URL, `display_order`, and `is_published`.
+2. Upload images to `gallery-media/{giftSiteId}/albums/{album-name}/` and copy their public URLs.
+3. Create `photos` rows with `album_id`, `image_url`, optional caption/alt text/date, `display_order`, and `is_published`.
+4. Change `albums.display_order` or `photos.display_order` to reorder content; filenames do not control order.
+5. Change `caption` or `photo_date` and refresh to update every view.
+6. Set an album or photo `is_published = false` to remove it from the public experience.
+
+`albums.cover_url` is preferred. Without one, the first published photo is used; empty albums use the existing memory placeholder. “All Memories” is derived from all published photos and requires no database album.
+
+### Gallery views
+
+- **Gallery View:** phone-gallery-inspired album library, album grids, All Memories, lightbox, favorites, and memory notes.
+- **Social View:** album highlights plus one-photo post cards structured with an `images` array for future multi-image posts.
+- **Highlight/Story View:** the same ordered `album.photos`, existing viewer controls, captions, dates, favorites, and notes.
+
+Supabase is authoritative when reachable, including a legitimate zero-album state. Static gallery configuration is used only on query/configuration failure. Old static photo comments/favorites are not fuzzy-mapped to Supabase UUIDs. `source_submission_id` is retained in normalized photo data for future ingestion, but Google Forms and cloud comments are not implemented.

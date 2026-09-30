@@ -197,3 +197,11 @@ Published albums and photos are loaded once by `src/js/gallery-content.js`. Gall
 - **Highlight/Story View:** the same ordered `album.photos`, existing viewer controls, captions, dates, favorites, and notes.
 
 Supabase is authoritative when reachable, including a legitimate zero-album state. Static gallery configuration is used only on query/configuration failure. Old static photo comments/favorites are not fuzzy-mapped to Supabase UUIDs. `source_submission_id` is retained in normalized photo data for future ingestion, but Google Forms and cloud comments are not implemented.
+
+## Google Form ingestion (Increment 6E)
+
+Google Form responses can now be staged through a secure Google Sheets → Apps Script → Supabase Edge Function pipeline. The pipeline reads the exact questions `Name`, `Epic picture mo`, `Letter`, and `Picture niyo together`; copies Drive-backed images into Supabase Storage; and creates only pending `letter_submissions` and `submission_media` records.
+
+It deliberately does **not** create public `letters`, `letter_blocks`, or `photos`. Creator approval and publishing remain a separate future workflow.
+
+Setup source and instructions live in [`integrations/google-form/`](integrations/google-form/README.md). The server endpoint lives in [`supabase/functions/ingest-letter-submission/`](supabase/functions/ingest-letter-submission/index.ts). Keep `GOOGLE_FORM_INGEST_SECRET` in Supabase Function secrets and Apps Script Properties only—never in Vite environment variables, Sheet cells, or committed source.

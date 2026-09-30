@@ -1,0 +1,6 @@
+[functions.ingest-letter-submission]
+# This is a webhook-style service endpoint, not a Supabase user request.
+# JWT verification is intentionally disabled at the gateway; the function
+# requires its own x-ingest-secret and rejects unauthorized requests.
+verify_jwt = false
+

@@ -1,5 +1,6 @@
 import { siteData } from '../data/content.js';
 import { supabase } from './supabase.js';
+import { loadPublishedGifts } from './gift-content.js';
 
 export const SITE_SLUG = 'happy-birthday-name';
 const LOAD_TIMEOUT_MS = 6000;
@@ -48,10 +49,11 @@ export async function loadSiteContent(siteSlug = SITE_SLUG) {
     if (siteResult.error) throw siteResult.error;
     if (!siteResult.data) throw new Error(`published site not found for slug ${siteSlug}`);
     const site = siteResult.data;
-    const [settings, slides, stickers] = await Promise.all([
+    const [settings, slides, stickers, giftContent] = await Promise.all([
       forSite('site_settings', 'intro_type,intro_video_url,homepage_character_url,global_music_url', site.id, { single: true }),
       forSite('intro_slides', 'image_url,alt_text,display_order', site.id, { order: true }),
       forSite('interactive_stickers', 'id,name,sticker_type,image_url,media_url,position_key,display_order', site.id, { order: true }),
+      loadPublishedGifts(site.id),
     ]);
     const activeSlides = (slides || []).map((slide) => ({ src: present(slide.image_url), alt: present(slide.alt_text) || 'Birthday intro image' })).filter((slide) => slide.src);
     const introType = settings?.intro_type === 'video' && present(settings.intro_video_url) ? 'video' : 'slideshow';
@@ -78,6 +80,8 @@ export async function loadSiteContent(siteSlug = SITE_SLUG) {
         globalBackgroundMusic: present(settings?.global_music_url),
       },
       stickers: (stickers || []).length ? stickers.map(normalizeSticker) : siteData.stickers,
+      gifts: giftContent.gifts,
+      giftSource: giftContent.authoritative ? 'supabase' : 'fallback',
     };
     Object.assign(siteData, normalized);
     console.info(`[SiteContent] Loaded Supabase site: ${siteSlug}`);

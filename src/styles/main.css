@@ -1852,3 +1852,5 @@ svg {
   transform: scale(0.985);
   transition: opacity 280ms ease, transform 280ms ease;
 }
+
+.gift-empty-state { width:100%;padding:44px 20px;color:var(--color-text-light);font-family:var(--font-display);font-size:clamp(1.2rem,3vw,1.7rem);text-align:center; }

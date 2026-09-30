@@ -179,8 +179,7 @@ export function isAllUnlocked(configuredGiftIds = null) {
   const state = getStorage();
   if (!Array.isArray(configuredGiftIds)) return state.allGiftsViewed;
 
-  const allGiftsViewed = configuredGiftIds.length > 0
-    && configuredGiftIds.every((id) => state.viewedGiftIds.includes(id));
+  const allGiftsViewed = configuredGiftIds.every((id) => state.viewedGiftIds.includes(id));
 
   if (allGiftsViewed !== state.allGiftsViewed) {
     saveStorage({ allGiftsViewed });

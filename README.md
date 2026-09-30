@@ -150,4 +150,27 @@ Refresh the website after a Dashboard edit. No source edit, rebuild, deployment,
 
 ## Fallback behavior
 
-`src/data/content.js` remains the complete fallback. Missing environment variables, unavailable Supabase, request timeouts, missing rows, and invalid optional media do not blank the site. Database values replace only the creator-controlled fields in this increment. Gifts, letters, sender content, albums, photos, annotations, comments, progress, and receiver preferences stay in their existing sources.
+`src/data/content.js` remains the complete fallback. Missing environment variables, unavailable Supabase, request timeouts, missing rows, and invalid optional media do not blank the site. Supabase is primary for site presentation and published gifts/letters; albums and photos remain static, while annotations, comments, progress, and receiver preferences remain local.
+
+## Supabase gifts and letters (Increment 6C)
+
+Published gifts are loaded once by `src/js/gift-content.js`, then normalized into the same shape consumed by the Gift Carousel, Letter Archive, and shared Letter Reader. The service performs at most two content queries: one ordered published-letter query and one ordered `letter_blocks` query for all returned letter UUIDs. UI modules do not query Supabase independently.
+
+### Create a letter manually
+
+1. Upload the sender picture to `sender-media` and copy its public URL.
+2. Upload the separate gift character to `sender-media`. A recommended path is `{giftSiteId}/{letter-or-sender}/character/`.
+3. Optionally upload letter BGM to `audio` under `{giftSiteId}/letters/` and copy its public URL.
+4. Create a `letters` row using the current site's `gift_site_id`. Set `sender_name`, `sender_photo_url`, `title`, optional legacy `content`, `character_image_url`, optional `music_url`, `display_order`, and `is_published`.
+5. Prefer creating `letter_blocks` rows. Each needs the letter UUID, a stable unique `block_key` such as `p1`, paragraph `content`, and `display_order`.
+6. Refresh the website. No source edit, rebuild, or redeployment is required.
+
+Set `is_published = false` to remove a letter from the receiver experience. Change `display_order` to reorder carousel and archive entries. Draft/unpublished letters are never replaced with static fallback letters when Supabase is reachable; zero published letters produces an intentional empty state.
+
+If no `letter_blocks` exist, legacy `letters.content` is split at blank lines into deterministic runtime IDs such as `legacy-p1`. Generated legacy blocks are not written back to Supabase.
+
+Sender and character images are separate. Missing/broken sender images use `default-sender.svg`; missing/broken character images use the generic birthday character. Letter music remains managed by the existing Audio Manager, including global pause/resume, master volume, and mute.
+
+Local reactions are keyed by the Supabase letter UUID plus `letter_blocks.block_key`. Old development reactions and viewed progress using IDs such as `gift-01` are intentionally not attached to new UUIDs. Previously viewed UUIDs remain stored when new letters are published, while completion is always recalculated against the current published UUID list.
+
+Google Forms, Apps Script, submission processing, and Gallery migration are not implemented yet.

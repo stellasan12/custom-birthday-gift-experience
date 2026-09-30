@@ -123,7 +123,7 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
             <button id="carousel-prev" class="carousel-nav-btn prev" aria-label="Previous gift character">&larr;</button>
 
             <div id="carousel-track" class="carousel-track" tabIndex="0" role="region" aria-label="Gift Carousel">
-              ${configuredGifts.map((gift) => renderGiftCharacterHTML(gift)).join('')}
+              ${configuredGifts.length ? configuredGifts.map((gift) => renderGiftCharacterHTML(gift)).join('') : '<p class="gift-empty-state">A few surprises are still being wrapped... 💌</p>'}
             </div>
 
             <button id="carousel-next" class="carousel-nav-btn next" aria-label="Next gift character">&rarr;</button>
@@ -296,7 +296,7 @@ function renderGiftCharacterHTML(gift) {
     >
       <div class="character-platform">
         <div class="character-img-wrapper">
-          <img src="${gift.characterImage}" alt="${gift.characterName}" class="character-img" />
+          <img src="${escapeHTML(gift.characterImage)}" alt="${escapeHTML(gift.characterName)}" class="character-img" onerror="if(!this.src.endsWith('/images/placeholders/birthday-character.svg'))this.src='/images/placeholders/birthday-character.svg'" />
         </div>
         <div class="character-shadow"></div>
       </div>

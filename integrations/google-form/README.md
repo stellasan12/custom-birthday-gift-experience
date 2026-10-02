@@ -1,6 +1,6 @@
 # Google Form ingestion setup
 
-This integration stages Google Form responses in Supabase. It never publishes a letter or gallery photo.
+This integration validates, stores, and automatically publishes Google Form responses through a privileged Supabase Edge Function. No creator approval step is required.
 
 ## Exact Form questions
 
@@ -86,8 +86,11 @@ To retry, select any cell in the failed response row, choose `retrySelectedRow` 
 3. Drive blobs are checked for type and size, then base64 encoded.
 4. The Edge Function validates the shared secret and entire payload before mutation.
 5. It resolves `gift_sites.slug = happy-birthday-name`.
-6. It creates or retrieves one `letter_submissions` row with `source = google_form` and `status = pending`.
+6. It creates or retrieves one `letter_submissions` row with `source = google_form` and a temporary `pending` status.
 7. Images upload to deterministic, content-hashed paths and corresponding `submission_media` records are upserted.
+8. The Edge Function calls the service-only transactional publisher.
+9. The letter, persistent blocks, and optional shared-memory photo are published automatically.
+10. The submission becomes `published` only after publication succeeds.
 
 Storage paths:
 
@@ -103,12 +106,15 @@ If a later upload or metadata insert fails, the request reports failure. Running
 Submit the real test values from the Increment 6E specification, then confirm:
 
 - The response Sheet shows `Synced`.
-- One `letter_submissions` record exists with `status = pending`.
+- One `letter_submissions` record exists with `status = published`.
 - Two `submission_media` records exist with the correct media types.
 - Both Storage objects exist at the expected paths.
-- No `letters`, `letter_blocks`, or `photos` records were created.
+- One published letter and stable paragraph-block set exist.
+- One published photo exists in `From Your Favorite People ♡` when shared media was supplied.
 - Retrying the same row changes the Sheet status to `Already Synced` without duplicates.
 - A request with the wrong secret returns HTTP 401 without mutation.
 - Missing `Name` or `Letter`, an inaccessible Drive file, unsupported MIME type, or oversized media records `Failed` and remains retryable.
 
 The script logs only row number, HTTP status/result, submission UUID, and sanitized failures. It does not log secrets, base64 media, or letter content.
+
+For defaults, optional customization, retry guarantees, and verification SQL, see [`supabase/AUTOMATIC_PUBLISHING.md`](../../supabase/AUTOMATIC_PUBLISHING.md).

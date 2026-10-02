@@ -200,8 +200,14 @@ Supabase is authoritative when reachable, including a legitimate zero-album stat
 
 ## Google Form ingestion (Increment 6E)
 
-Google Form responses can now be staged through a secure Google Sheets → Apps Script → Supabase Edge Function pipeline. The pipeline reads the exact questions `Name`, `Epic picture mo`, `Letter`, and `Picture niyo together`; copies Drive-backed images into Supabase Storage; and creates only pending `letter_submissions` and `submission_media` records.
-
-It deliberately does **not** create public `letters`, `letter_blocks`, or `photos`. Creator approval and publishing remain a separate future workflow.
+Google Form responses are processed through a secure Google Sheets → Apps Script → Supabase Edge Function pipeline. It reads the exact questions `Name`, `Epic picture mo`, `Letter`, and `Picture niyo together`; validates and copies Drive-backed images into Supabase Storage; retains the raw submission audit trail; and automatically creates the public letter, stable blocks, and optional gallery memory.
 
 Setup source and instructions live in [`integrations/google-form/`](integrations/google-form/README.md). The server endpoint lives in [`supabase/functions/ingest-letter-submission/`](supabase/functions/ingest-letter-submission/index.ts). Keep `GOOGLE_FORM_INGEST_SECRET` in Supabase Function secrets and Apps Script Properties only—never in Vite environment variables, Sheet cells, or committed source.
+
+## Automatic publishing (revised Increment 6F)
+
+Successful Form submissions publish without manual approval. Each receives the default title `For you 💌`, frontend character/sender fallbacks where needed, no letter-specific BGM, and automatic append ordering. Shared memories enter the per-site `From Your Favorite People ♡` album; missing shared media creates no fake photo.
+
+The transactional publisher remains idempotent: contributor-derived letters and photos use partial unique indexes on `source_submission_id`, retries preserve existing publication records, and stable letter blocks are never regenerated. Creators can optionally personalize live letter and photo fields later in Supabase without republishing.
+
+See [Automatic Google Form publishing](supabase/AUTOMATIC_PUBLISHING.md) for deployment, defaults, optional customization, and verification.

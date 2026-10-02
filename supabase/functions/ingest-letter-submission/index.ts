@@ -178,7 +178,22 @@ Deno.serve(async (request) => {
     for (const media of payload.senderPhotos) await uploadMedia('sender_photo', media);
     for (const media of payload.sharedMemories) await uploadMedia('shared_memory', media);
 
-    return json({ ok: true, status: wasExisting ? 'already_processed' : 'created', submissionId });
+    const publicationResult = await supabase.rpc('auto_publish_submission', {
+      p_submission_id: submissionId,
+      p_supabase_url: url,
+    });
+    if (publicationResult.error) throw publicationResult.error;
+    if (!publicationResult.data || typeof publicationResult.data !== 'object') {
+      throw new RequestError(502, 'publication_failed');
+    }
+    const publication = publicationResult.data as Record<string, unknown>;
+
+    return json({
+      ok: true,
+      status: wasExisting || publication.status === 'already_published' ? 'already_processed' : 'created',
+      submissionId,
+      publication,
+    });
   } catch (error) {
     if (error instanceof RequestError) return json({ ok: false, error: error.code }, error.status);
     console.error('ingest-letter-submission failed', error instanceof Error ? error.message : 'unknown error');

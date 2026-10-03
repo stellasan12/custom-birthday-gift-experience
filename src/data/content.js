@@ -46,7 +46,7 @@ export const siteData = {
    */
   audio: {
     globalBackgroundMusic: "/audio/background/general-bgm.mp3",
-    defaultVolume: 0.4,
+    defaultVolume: 0.3,
   },
 
   /** MEMORY GALLERY — both Gallery and Social views render this same data. */
@@ -224,7 +224,7 @@ export const siteData = {
       type: "video",
       label: "Seventeen Mingyu",
       image: "/images/stickers/standee.png",
-      video: "/video/standee-placeholder.mp4",
+      video: "/videos/sticker-mingyu.mp4",
       //tooltip: "Click to watch special message video!",
     },
     {
@@ -232,14 +232,16 @@ export const siteData = {
       type: "music",
       label: "Demon Slayer",
       image: "/images/stickers/poster.png",
-      //tooltip: "Click to toggle background music!",
+      music: "/audio/background/sticker-demon-slayer.mp3",
+      //tooltip: "Click to toggle background music! (to change music hihi, when clicked this again, paused, then when double clicked around the websitem switch to default bg music)",
     },
     {
       id: "custom-object",
-      type: "custom",
+      type: "petals",
       label: "Ezer",
-      image: "/images/stickers/holding-letter-1.png",
-      //tooltip: "Click to change or add object!",
+      image: "/images/stickers/flower-pot.png",
+      petalStyle: "garden",
+      //tooltip: "Click for petal shower magic! (can you do a different flower petal??)",
     },
   ],
 };

@@ -33,6 +33,13 @@ let targetVolume = initialSettings.volume;
 /** Duration for fade transitions in ms */
 const FADE_DURATION = 800;
 
+/** The site BGM is mastered louder than secondary tracks, so tame it independently. */
+const GLOBAL_BGM_GAIN = 0.20;
+
+function globalBgmVolume() {
+  return Math.min(1, targetVolume * GLOBAL_BGM_GAIN);
+}
+
 /** Active fade interval reference */
 let fadeInterval = null;
 
@@ -93,12 +100,28 @@ export function initAudio() {
   document.addEventListener('keydown', interactionHandler, { capture: true, passive: true });
   document.addEventListener('touchstart', interactionHandler, { capture: true, passive: true });
 
-  // Throughout the system, double-clicking toggles BGM play/pause
-  document.addEventListener('dblclick', () => {
+  // A double-click always returns secondary sticker audio to the original BGM.
+  document.addEventListener('dblclick', (event) => {
     if (!hasUserInteracted) {
       hasUserInteracted = true;
       removeInteractionListeners();
     }
+
+    // Prevent blue native selection on images and interactive decorations.
+    if (event.target instanceof Element
+      && event.target.closest('img, button, [role="button"], .sticker-btn, .explore-footer')) {
+      event.preventDefault();
+      window.getSelection()?.removeAllRanges();
+    }
+
+    if (isStickerMusicPlaying()) {
+      stopStickerMusic({ restoreGlobal: false });
+      setMuted(false);
+      playGlobalMusic();
+      return;
+    }
+
+    // With the original BGM active, double-click keeps its original mute toggle.
     toggleMute();
   });
 }
@@ -140,10 +163,10 @@ function fadeIn() {
     currentStep++;
     const progress = currentStep / steps;
     // Ease-out curve for natural fade in
-    bgmElement.volume = targetVolume * (1 - Math.pow(1 - progress, 2));
+    bgmElement.volume = globalBgmVolume() * (1 - Math.pow(1 - progress, 2));
 
     if (currentStep >= steps) {
-      bgmElement.volume = targetVolume;
+      bgmElement.volume = globalBgmVolume();
       clearFade();
     }
   }, stepTime);
@@ -225,7 +248,7 @@ export function setVolume(val) {
   saveSettings({ volume: targetVolume });
   // Only set directly if not mid-fade
   if (!fadeInterval && bgmElement && !bgmElement.paused) {
-    bgmElement.volume = targetVolume;
+    bgmElement.volume = globalBgmVolume();
   }
   if (letterAudioElement) letterAudioElement.volume = targetVolume;
   if (stickerAudioElement) stickerAudioElement.volume = targetVolume;
@@ -319,8 +342,12 @@ export function toggleStickerMusic(src) {
   stickerAudioElement.loop = true;
   stickerAudioElement.volume = targetVolume;
   stickerAudioElement.muted = isMuted;
-  stickerAudioElement.play().catch(() => {});
+  stickerAudioElement.play().catch(() => { });
   return true;
+}
+
+export function isStickerMusicPlaying() {
+  return Boolean(stickerAudioElement && !stickerAudioElement.paused);
 }
 
 export function stopStickerMusic({ restoreGlobal = true } = {}) {

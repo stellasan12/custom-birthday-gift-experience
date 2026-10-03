@@ -188,11 +188,18 @@ Deno.serve(async (request) => {
     }
     const publication = publicationResult.data as Record<string, unknown>;
 
+    const galleryResult = await supabase.rpc('publish_submission_media_to_gallery', {
+      p_submission_id: submissionId,
+      p_supabase_url: url,
+    });
+    if (galleryResult.error) throw galleryResult.error;
+
     return json({
       ok: true,
       status: wasExisting || publication.status === 'already_published' ? 'already_processed' : 'created',
       submissionId,
       publication,
+      galleryPublication: galleryResult.data,
     });
   } catch (error) {
     if (error instanceof RequestError) return json({ ok: false, error: error.code }, error.status);

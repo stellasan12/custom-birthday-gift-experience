@@ -86,7 +86,8 @@ export function selectionToAnchor(selection, letterBody) {
   selected.setStart(range.startContainer, range.startOffset);
   selected.setEnd(range.endContainer, range.endOffset);
 
-  const startOffset = before.toString().length;
+  const blockOffset = Number(startBlock.dataset.blockOffset) || 0;
+  const startOffset = blockOffset + before.toString().length;
   const selectedText = selected.toString();
   if (!selectedText.trim()) return { error: 'Select actual words to react to 💌' };
 

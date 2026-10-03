@@ -14,9 +14,11 @@ import './styles/increment5.css';
 import { initApp } from './js/app.js';
 import { applySettings } from './js/settings.js';
 import { loadSiteContent } from './js/site-content.js';
+import { setupGlobalButtonSounds } from './js/sound-effects.js';
 
 // Apply persisted palette and reading scale before the application renders.
 applySettings();
+setupGlobalButtonSounds();
 
 async function boot() {
   const app = document.getElementById('app');

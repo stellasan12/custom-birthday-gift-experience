@@ -24,7 +24,7 @@
   /* Explore Header Mobile Layout */
   .explore-header {
     padding: 8px 12px;
-    margin: 8px;
+    margin: 0;
     gap: 8px;
   }
 
@@ -45,6 +45,8 @@
   .nav-label {
     font-size: 0.75rem;
   }
+
+  .room-window{left:12%;width:90px;height:85px;border-width:6px}.room-window span{display:none}.room-shelf{display:none}.room-bed{right:2%;width:125px;height:68px;opacity:.75}.room-rug{right:8%;left:8%}
 
   .room-main-row {
     gap: 12px;
@@ -114,6 +116,15 @@
     margin-bottom: 22px;
   }
 
+  .letter-pagination {
+    gap: 6px;
+  }
+
+  .letter-pagination button {
+    padding: 8px 10px;
+    font-size: .76rem;
+  }
+
   .receiver-reaction {
     margin-left: 10px;
   }
@@ -148,11 +159,11 @@
 /* ── Tablets (≥ 768px) ── */
 @media (min-width: 768px) {
   .homepage {
-    padding: var(--space-xl) var(--space-lg);
+    padding: clamp(16px, 3svh, 30px) var(--space-lg);
   }
 
   .homepage__character {
-    margin-bottom: var(--space-xl);
+    margin-bottom: clamp(10px, 2svh, 20px);
   }
 
   .intro__skip {
@@ -164,14 +175,14 @@
 /* ── Desktop (≥ 1024px) ── */
 @media (min-width: 1024px) {
   .homepage {
-    padding: var(--space-2xl) var(--space-xl);
+    padding: clamp(18px, 3svh, 32px) var(--space-xl);
   }
 }
 
 /* ── Large desktop (≥ 1440px) ── */
 @media (min-width: 1440px) {
   .homepage__greeting-name {
-    font-size: 4.5rem;
+    font-size: clamp(2.5rem, min(4vw, 7svh), 3.75rem);
   }
 }
 

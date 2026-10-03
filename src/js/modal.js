@@ -89,6 +89,8 @@ export function openModal({ title, bodyHTML, isVideo = false, onClose, beforeClo
   });
 
   escListener = (e) => {
+    // Nested lightboxes manage their own Escape key and focus boundary.
+    if (document.querySelector('[data-nested-modal]')) return;
     if (e.key === 'Escape') {
       handleClose();
       return;

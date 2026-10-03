@@ -13,13 +13,17 @@ import { burstConfetti } from './effects.js';
 import {
   initAudio,
   playGlobalMusic,
+  pauseGlobalMusic,
   toggleMute,
   getMuted,
+  getVolume,
   onStateChange,
 } from './audio.js';
 import { renderExploreRoom } from './explore.js';
 import { renderGallery } from './gallery.js';
 import { renderLetterArchive } from './letter-archive.js';
+import { mountMusicToggle } from './music-toggle.js';
+import { hasSeenIntro, markIntroSeen } from './storage.js';
 
 // ── Constants ──
 const INTRO_FADE_MS = 800;
@@ -29,6 +33,8 @@ const REVEAL_STEP_MS = 300; // delay between each homepage element
 let introTimer = null;
 let currentSlide = 0;
 let introKeyHandler = null;
+let introAudioCleanup = null;
+let introStartSoundCleanup = null;
 const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
 
 /**
@@ -37,21 +43,27 @@ const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => (
  */
 export function initApp() {
   const appEl = document.getElementById('app');
-  appEl.innerHTML = buildHTML();
+  const shouldPlayIntro = !hasSeenIntro();
+  appEl.innerHTML = buildHTML(shouldPlayIntro);
 
   initAudio();
-  setupIntro();
-  setupAudioToggle();
+  mountMusicToggle(appEl);
   setupCTA();
+  if (shouldPlayIntro) {
+    markIntroSeen();
+    setupIntro();
+  } else {
+    revealHomepage();
+  }
 }
 
 // ═════════════════════════════════════════════════
 //  HTML CONSTRUCTION
 // ═════════════════════════════════════════════════
 
-function buildHTML() {
+function buildHTML(includeIntro = true) {
   return `
-    ${buildIntroHTML()}
+    ${includeIntro ? buildIntroHTML() : ''}
     ${buildHomepageHTML()}
     ${buildBackgroundDecor()}
     ${buildAudioToggle()}
@@ -65,12 +77,10 @@ function buildIntroHTML() {
     return `
       <div class="intro" id="intro" role="dialog" aria-label="Intro sequence">
         <div class="intro__video">
-          <video id="intro-video" muted playsinline preload="auto">
+          <video id="intro-video" autoplay muted playsinline preload="auto">
             <source src="${intro.video}" type="video/mp4">
           </video>
-          <button class="intro__video-play" id="intro-play-btn" aria-label="Play intro video">
-            ▶ Play
-          </button>
+          <button class="intro__sound" id="intro-sound-btn" type="button" aria-pressed="false" aria-label="Turn on intro video sound" title="Turn sound on">🔇</button>
         </div>
         <button class="intro__skip" id="intro-skip" aria-label="Skip intro">
           Skip Intro ›
@@ -136,6 +146,9 @@ function buildHomepageHTML() {
       <button class="homepage__cta" id="homepage-cta" type="button">
         Explore your gift!
         <span class="homepage__cta-icon" aria-hidden="true">🎁</span>
+      </button>
+      <button class="homepage__replay-intro" id="homepage-replay-intro" type="button">
+        Watch video intro ↻
       </button>
       <div class="homepage__placeholder-msg" id="placeholder-msg" aria-live="polite"></div>
     </main>
@@ -220,27 +233,62 @@ function setupSlideshowIntro() {
 
 function setupVideoIntro() {
   const video = document.getElementById('intro-video');
-  const playBtn = document.getElementById('intro-play-btn');
+  const soundBtn = document.getElementById('intro-sound-btn');
   if (!video) { endIntro(); return; }
 
-  // Attempt autoplay (muted to comply with browser policy)
+  let soundEnabled = !getMuted();
+  video.volume = getVolume();
+  video.muted = getMuted();
+
+  const syncIntroSound = (muted = getMuted(), volume = getVolume()) => {
+    video.volume = volume;
+    video.muted = muted || !soundEnabled;
+    if (!soundBtn) return;
+    const audible = soundEnabled && !muted;
+    soundBtn.textContent = audible ? '🔊' : '🔇';
+    soundBtn.setAttribute('aria-pressed', String(audible));
+    soundBtn.setAttribute('aria-label', audible ? 'Mute intro video' : 'Turn on intro video sound');
+    soundBtn.title = audible ? 'Mute sound' : 'Turn sound on';
+  };
+  introAudioCleanup = onStateChange(syncIntroSound);
+  syncIntroSound();
+
+  // Try the receiver's saved sound state first. If the browser blocks audible
+  // autoplay, keep the video moving silently until the first user gesture.
   const playPromise = video.play();
   if (playPromise && typeof playPromise.then === 'function') {
     playPromise
-      .then(() => {
-        // Autoplay succeeded — hide the manual play button
-        playBtn?.classList.add('hidden');
-      })
       .catch(() => {
-        // Autoplay blocked — show the play button
-        playBtn?.classList.remove('hidden');
+        soundEnabled = false;
+        video.muted = true;
+        syncIntroSound();
+        video.play().catch(() => {});
       });
   }
 
-  // Manual play button
-  playBtn?.addEventListener('click', () => {
-    video.play().catch(() => {});
-    playBtn.classList.add('hidden');
+  const startSoundFromGesture = (event) => {
+    if (event.target instanceof Element && event.target.closest('#intro-sound-btn')) return;
+    if (!getMuted()) {
+      soundEnabled = true;
+      syncIntroSound();
+      video.play().catch(() => {});
+    }
+    introStartSoundCleanup?.();
+  };
+  document.addEventListener('pointerdown', startSoundFromGesture, { capture: true, once: true });
+  document.addEventListener('keydown', startSoundFromGesture, { capture: true, once: true });
+  introStartSoundCleanup = () => {
+    document.removeEventListener('pointerdown', startSoundFromGesture, true);
+    document.removeEventListener('keydown', startSoundFromGesture, true);
+    introStartSoundCleanup = null;
+  };
+
+  soundBtn?.addEventListener('click', () => {
+    const turningOn = video.muted;
+    soundEnabled = turningOn;
+    if (turningOn && getMuted()) toggleMute();
+    syncIntroSound();
+    if (turningOn) video.play().catch(() => {});
   });
 
   // Handle missing video source
@@ -263,6 +311,13 @@ function endIntro() {
     document.removeEventListener('keydown', introKeyHandler);
     introKeyHandler = null;
   }
+
+  introAudioCleanup?.();
+  introAudioCleanup = null;
+  introStartSoundCleanup?.();
+
+  const introVideo = document.getElementById('intro-video');
+  introVideo?.pause();
 
   const introEl = document.getElementById('intro');
   if (!introEl || introEl.classList.contains('fade-out')) return;
@@ -290,6 +345,8 @@ function revealHomepage() {
 
   // Make homepage visible
   homepage.classList.add('visible');
+  mountMusicToggle(document.getElementById('app'));
+  playGlobalMusic();
 
   // Staggered reveal sequence
   setTimeout(() => {
@@ -313,10 +370,6 @@ function revealHomepage() {
     character?.classList.add('idle');
   }, REVEAL_STEP_MS * 4);
 
-  // Attempt to start background music after reveal
-  setTimeout(() => {
-    playGlobalMusic();
-  }, REVEAL_STEP_MS * 3);
 }
 
 // ═════════════════════════════════════════════════
@@ -326,6 +379,15 @@ function revealHomepage() {
 function setupCTA() {
   const ctaBtn = document.getElementById('homepage-cta');
   ctaBtn?.addEventListener('click', handleExploreGift);
+  document.getElementById('homepage-replay-intro')?.addEventListener('click', replayIntro);
+}
+
+function replayIntro() {
+  const appEl = document.getElementById('app');
+  if (!appEl || document.getElementById('intro')) return;
+  pauseGlobalMusic(true);
+  appEl.insertAdjacentHTML('afterbegin', buildIntroHTML());
+  setupIntro();
 }
 
 /**
@@ -340,37 +402,34 @@ function handleExploreGift() {
 
   // Let the homepage settle into a short transition before swapping views.
   setTimeout(() => {
-    const showExplore = () => renderExploreRoom(
-      appEl,
-      () => initApp(),
-      () => renderGallery(appEl, showExplore, () => renderLetterArchive(appEl, showExplore)),
-      () => renderLetterArchive(appEl, showExplore)
-    );
-    showExplore();
+    const viewHistory = [];
+    let currentView = 'explore';
+
+    const renderView = (view, remember = true) => {
+      if (remember && view !== currentView) viewHistory.push(currentView);
+      currentView = view;
+
+      const goBack = () => renderView(viewHistory.pop() || 'explore', false);
+      if (view === 'gallery') {
+        renderGallery(appEl, goBack, () => renderView('letters'));
+      } else if (view === 'letters') {
+        renderLetterArchive(appEl, goBack);
+      } else {
+        renderExploreRoom(
+          appEl,
+          () => initApp(),
+          () => renderView('gallery'),
+          () => renderView('letters')
+        );
+      }
+      mountMusicToggle(appEl);
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    };
+
+    renderView('explore', false);
   }, 280);
 }
 
 // ═════════════════════════════════════════════════
 //  AUDIO TOGGLE
 // ═════════════════════════════════════════════════
-
-function setupAudioToggle() {
-  const toggleBtn = document.getElementById('audio-toggle');
-  if (!toggleBtn) return;
-
-  function updateIcon(muted) {
-    toggleBtn.textContent = muted ? '🔇' : '🔊';
-    toggleBtn.setAttribute(
-      'aria-label',
-      muted ? 'Unmute background music' : 'Mute background music'
-    );
-  }
-
-  toggleBtn.addEventListener('click', () => {
-    toggleMute();
-    updateIcon(getMuted());
-  });
-
-  // Sync if mute state changes elsewhere
-  onStateChange(updateIcon);
-}

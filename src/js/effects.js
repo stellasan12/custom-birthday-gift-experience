@@ -5,6 +5,8 @@
  * Uses <canvas> elements for smooth performance.
  */
 
+import { playSoundEffect } from './sound-effects.js';
+
 /** Whether the user prefers reduced motion */
 const prefersReducedMotion = window.matchMedia(
   '(prefers-reduced-motion: reduce)'
@@ -19,6 +21,7 @@ const prefersReducedMotion = window.matchMedia(
  * @param {number} [options.duration=3000]   Animation duration in ms
  */
 export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
+  playSoundEffect('confetti');
   // Respect reduced motion preference
   if (prefersReducedMotion) return;
 
@@ -128,8 +131,10 @@ export function burstConfetti({ particleCount = 80, duration = 3000 } = {}) {
  * @param {object} [options]
  * @param {number} [options.count=35]
  * @param {number} [options.duration=4000]
+ * @param {'classic'|'garden'} [options.style='classic']
  */
-export function showerPetals({ count = 35, duration = 4000 } = {}) {
+export function showerPetals({ count = 35, duration = 4000, style = 'classic' } = {}) {
+  playSoundEffect('petals');
   if (prefersReducedMotion) return;
 
   const canvas = document.createElement('canvas');
@@ -147,7 +152,9 @@ export function showerPetals({ count = 35, duration = 4000 } = {}) {
   };
   window.addEventListener('resize', onResize);
 
-  const petalColors = ['#FFC0CB', '#FFB6C1', '#FF69B4', '#FFA07A', '#E6E6FA'];
+  const petalColors = style === 'garden'
+    ? ['#FFF4A8', '#FFFDF2', '#B9DFA7', '#C7B7EA', '#91C9E8']
+    : ['#FFC0CB', '#FFB6C1', '#FF69B4', '#FFA07A', '#E6E6FA'];
 
   const petals = Array.from({ length: count }, () => ({
     x: Math.random() * width,
@@ -190,10 +197,25 @@ export function showerPetals({ count = 35, duration = 4000 } = {}) {
       ctx.globalAlpha = p.opacity;
       ctx.fillStyle = p.color;
 
-      // Draw organic petal shape
-      ctx.beginPath();
-      ctx.ellipse(0, 0, p.size / 2, p.size, Math.PI / 4, 0, Math.PI * 2);
-      ctx.fill();
+      if (style === 'garden') {
+        // A tiny five-petal wildflower, visually distinct from the pink petals.
+        for (let petal = 0; petal < 5; petal += 1) {
+          ctx.save();
+          ctx.rotate((Math.PI * 2 * petal) / 5);
+          ctx.beginPath();
+          ctx.ellipse(0, -p.size * .48, p.size * .28, p.size * .55, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.beginPath();
+        ctx.fillStyle = '#E7A94A';
+        ctx.arc(0, 0, p.size * .2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size / 2, p.size, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       ctx.restore();
     }
@@ -207,4 +229,33 @@ export function showerPetals({ count = 35, duration = 4000 } = {}) {
   }
 
   requestAnimationFrame(animate);
+}
+
+/** Throw a small spray of hearts from a favorite button. */
+export function burstHearts(origin, { count = 11 } = {}) {
+  playSoundEffect('heart');
+  if (!(origin instanceof Element) || prefersReducedMotion) return;
+
+  const rect = origin.getBoundingClientRect();
+  const layer = document.createElement('div');
+  layer.className = 'heart-burst-layer';
+  layer.setAttribute('aria-hidden', 'true');
+  layer.style.left = `${rect.left + rect.width / 2}px`;
+  layer.style.top = `${rect.top + rect.height / 2}px`;
+
+  for (let index = 0; index < count; index += 1) {
+    const heart = document.createElement('span');
+    const angle = (-155 + Math.random() * 130) * (Math.PI / 180);
+    const distance = 54 + Math.random() * 75;
+    heart.textContent = index % 3 ? '♥' : '♡';
+    heart.style.setProperty('--heart-x', `${Math.cos(angle) * distance}px`);
+    heart.style.setProperty('--heart-y', `${Math.sin(angle) * distance}px`);
+    heart.style.setProperty('--heart-rotate', `${-35 + Math.random() * 70}deg`);
+    heart.style.setProperty('--heart-delay', `${Math.random() * 90}ms`);
+    heart.style.setProperty('--heart-scale', String(.72 + Math.random() * .72));
+    layer.append(heart);
+  }
+
+  document.body.append(layer);
+  window.setTimeout(() => layer.remove(), 1100);
 }

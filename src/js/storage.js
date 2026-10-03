@@ -10,7 +10,7 @@ const STORAGE_KEY = 'birthdayGiftExperience';
 export const DEFAULT_SETTINGS = Object.freeze({
   theme: 'birthday',
   fontSize: 'normal',
-  volume: 0.7,
+  volume: 0.3,
   muted: false,
 });
 
@@ -18,7 +18,9 @@ const THEMES = new Set(['birthday', 'lavender', 'peach', 'mint']);
 const FONT_SIZES = new Set(['small', 'normal', 'large', 'extra-large']);
 
 const defaultState = {
+  hasSeenIntro: false,
   hasRevealedGifts: false,
+  awakenedStickerIds: [],
   viewedGiftIds: [],
   allGiftsViewed: false,
   annotations: {},
@@ -89,7 +91,11 @@ export function getStorage() {
     if (!raw) return { ...defaultState, settings: { ...DEFAULT_SETTINGS } };
     const parsed = JSON.parse(raw);
     return {
+      hasSeenIntro: Boolean(parsed.hasSeenIntro),
       hasRevealedGifts: Boolean(parsed.hasRevealedGifts),
+      awakenedStickerIds: Array.isArray(parsed.awakenedStickerIds)
+        ? [...new Set(parsed.awakenedStickerIds.filter((id) => typeof id === 'string'))]
+        : [],
       viewedGiftIds: Array.isArray(parsed.viewedGiftIds)
         ? [...new Set(parsed.viewedGiftIds.filter((id) => typeof id === 'string'))]
         : [],
@@ -120,6 +126,14 @@ export function saveStorage(updates) {
   }
 }
 
+export function hasSeenIntro() {
+  return getStorage().hasSeenIntro;
+}
+
+export function markIntroSeen() {
+  return saveStorage({ hasSeenIntro: true });
+}
+
 /**
  * Check if the "CLICK ME" gift reveal has been completed.
  */
@@ -133,6 +147,17 @@ export function isGiftsRevealed() {
  */
 export function setGiftsRevealed(revealed = true) {
   return saveStorage({ hasRevealedGifts: revealed });
+}
+
+export function getAwakenedStickerIds() {
+  return [...getStorage().awakenedStickerIds];
+}
+
+export function markStickerAwakened(stickerId) {
+  if (typeof stickerId !== 'string' || !stickerId) return getAwakenedStickerIds();
+  const ids = [...new Set([...getAwakenedStickerIds(), stickerId])];
+  saveStorage({ awakenedStickerIds: ids });
+  return ids;
 }
 
 /**

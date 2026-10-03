@@ -2,7 +2,7 @@
 
 import { siteData } from '../data/content.js';
 import { openModal } from './modal.js';
-import { startLetterMusic, stopLetterMusic, setVolume, getVolume, setMuted, getMuted } from './audio.js';
+import { startLetterMusic, stopLetterMusic, setVolume, getVolume, setMuted, getMuted, onStateChange } from './audio.js';
 import { getGiftAnnotations, saveGiftAnnotations } from './storage.js';
 import {
   ANNOTATION_COLORS,
@@ -13,6 +13,7 @@ import {
 } from './annotations.js';
 
 const DEFAULT_SENDER = '/images/placeholders/default-sender.svg';
+const WORDS_PER_PAGE = 100;
 let activeCleanup = null;
 
 export function openLetter(giftId) {
@@ -27,6 +28,8 @@ export function openLetter(giftId) {
   let composerDirty = false;
   let selectionTimer = null;
   const blocks = Array.isArray(gift.letter?.content) ? gift.letter.content : [];
+  const pages = paginateLetterBlocks(blocks, WORDS_PER_PAGE);
+  let currentPage = 0;
 
   const modal = openModal({
     title: 'A letter for you 💌',
@@ -36,12 +39,17 @@ export function openLetter(giftId) {
         <div class="envelope-back" aria-hidden="true"></div>
         <article class="letter-paper" aria-label="Birthday letter">
         <header class="letter-sender">
-          <div class="sender-polaroid"><img class="letter-sender-photo" alt=""></div>
+          <button type="button" class="sender-polaroid" aria-label="View sender photo"><img class="letter-sender-photo" alt=""></button>
           <div><span class="letter-from-label">A letter from</span><strong class="letter-sender-name"></strong></div>
         </header>
         <h2 class="letter-heading font-heading"></h2>
         <div class="letter-body" aria-label="Letter content"></div>
         <p class="letter-empty" hidden>This little letter is waiting for its words 💌</p>
+        <nav class="letter-pagination" aria-label="Letter pages" hidden>
+          <button type="button" class="letter-page-prev" aria-label="Read previous page">← Previous</button>
+          <span class="letter-page-count" aria-live="polite"></span>
+          <button type="button" class="letter-page-next" aria-label="Read next page">Next →</button>
+        </nav>
         <p class="letter-signoff"></p>
         <div class="letter-doodle" aria-hidden="true">♡ ✦ ♫</div>
         <section class="letter-music" aria-label="Letter music controls">
@@ -110,17 +118,61 @@ export function openLetter(giftId) {
   const status = modal.querySelector('.letter-reader-status');
   const preview = modal.querySelector('.reaction-selection-preview');
   const colors = modal.querySelector('.reaction-colors');
+  const pagination = modal.querySelector('.letter-pagination');
+  const previousPageButton = modal.querySelector('.letter-page-prev');
+  const nextPageButton = modal.querySelector('.letter-page-next');
+  const pageCount = modal.querySelector('.letter-page-count');
+  const signoff = modal.querySelector('.letter-signoff');
+  const music = modal.querySelector('.letter-music');
 
   const senderName = gift.sender?.name?.trim() || 'Someone who cares about you';
   const senderPhoto = modal.querySelector('.letter-sender-photo');
+  const senderPhotoButton = modal.querySelector('.sender-polaroid');
+  let closeSenderViewer = null;
   senderPhoto.alt = `Photo of ${senderName}`;
   senderPhoto.src = gift.sender?.photo?.trim() || DEFAULT_SENDER;
   senderPhoto.addEventListener('error', () => {
     if (!senderPhoto.src.endsWith(DEFAULT_SENDER)) senderPhoto.src = DEFAULT_SENDER;
   });
+  senderPhotoButton?.addEventListener('click', () => {
+    closeSenderViewer?.(false);
+    const overlay = document.createElement('div');
+    overlay.className = 'sender-photo-viewer';
+    overlay.dataset.nestedModal = 'true';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', `Photo of ${senderName}`);
+    overlay.innerHTML = `<div class="sender-photo-viewer-card"><button type="button" class="sender-photo-viewer-close" aria-label="Close sender photo">×</button><img class="sender-photo-viewer-image" alt=""></div>`;
+    const fullPhoto = overlay.querySelector('.sender-photo-viewer-image');
+    const closeButton = overlay.querySelector('.sender-photo-viewer-close');
+    fullPhoto.src = senderPhoto.currentSrc || senderPhoto.src || DEFAULT_SENDER;
+    fullPhoto.alt = `Photo of ${senderName}`;
+    fullPhoto.addEventListener('error', () => { fullPhoto.src = DEFAULT_SENDER; }, { once: true });
+
+    const keyHandler = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeSenderViewer?.();
+      }
+      if (event.key === 'Tab') event.preventDefault();
+    };
+    closeSenderViewer = (restoreFocus = true) => {
+      document.removeEventListener('keydown', keyHandler);
+      overlay.remove();
+      modal.removeAttribute('inert');
+      closeSenderViewer = null;
+      if (restoreFocus) senderPhotoButton.focus();
+    };
+    closeButton.addEventListener('click', () => closeSenderViewer?.());
+    overlay.addEventListener('click', (event) => { if (event.target === overlay) closeSenderViewer?.(); });
+    modal.setAttribute('inert', '');
+    document.body.append(overlay);
+    document.addEventListener('keydown', keyHandler);
+    closeButton.focus();
+  });
   modal.querySelector('.letter-sender-name').textContent = senderName;
   modal.querySelector('.letter-heading').textContent = gift.letter?.title || 'For you 💌';
-  modal.querySelector('.letter-signoff').textContent = gift.letter?.signoff || '';
+  signoff.textContent = gift.letter?.signoff || '';
   modal.querySelector('.letter-empty').hidden = blocks.length > 0;
 
   ANNOTATION_COLORS.forEach((color, index) => {
@@ -137,24 +189,61 @@ export function openLetter(giftId) {
     colors.append(label);
   });
 
-  function renderLetter() {
+  function renderLetter(direction = 'next') {
     body.replaceChildren();
-    blocks.forEach((block) => {
+    const page = pages[currentPage] || [];
+    page.forEach((segment) => {
+      const block = blocks.find((item) => item.id === segment.id);
+      const canonicalText = String(block?.text ?? '');
       const group = document.createElement('section');
       group.className = 'letter-block-group';
       const paragraph = document.createElement('p');
       paragraph.className = 'letter-block';
-      paragraph.dataset.blockId = block.id;
-      const blockRecords = getRenderableAnnotations(
-        records.filter((record) => record.blockId === block.id),
-        String(block.text ?? '')
+      paragraph.dataset.blockId = segment.id;
+      paragraph.dataset.blockOffset = String(segment.startOffset);
+      const canonicalRecords = getRenderableAnnotations(
+        records.filter((record) => record.blockId === segment.id),
+        canonicalText
       );
-      appendHighlightedText(paragraph, String(block.text ?? ''), blockRecords);
+      const visibleRecords = canonicalRecords
+        .filter((record) => record.startOffset < segment.endOffset && record.endOffset > segment.startOffset)
+        .map((record) => ({
+          ...record,
+          startOffset: Math.max(record.startOffset, segment.startOffset) - segment.startOffset,
+          endOffset: Math.min(record.endOffset, segment.endOffset) - segment.startOffset,
+        }));
+      appendHighlightedText(paragraph, segment.text, visibleRecords);
       group.append(paragraph);
 
-      blockRecords.forEach((record) => group.append(buildReaction(record)));
+      canonicalRecords
+        .filter((record) => record.startOffset >= segment.startOffset && record.startOffset < segment.endOffset)
+        .forEach((record) => group.append(buildReaction(record)));
       body.append(group);
     });
+    body.classList.remove('is-turning-next', 'is-turning-previous');
+    void body.offsetWidth;
+    body.classList.add(direction === 'previous' ? 'is-turning-previous' : 'is-turning-next');
+
+    const hasPages = pages.length > 1;
+    const onLastPage = currentPage === pages.length - 1;
+    pagination.hidden = !hasPages;
+    previousPageButton.disabled = currentPage === 0;
+    nextPageButton.disabled = onLastPage;
+    pageCount.textContent = `Page ${currentPage + 1} of ${Math.max(1, pages.length)}`;
+    signoff.hidden = !onLastPage;
+    music.hidden = !onLastPage;
+  }
+
+  function turnPage(offset) {
+    const nextPage = currentPage + offset;
+    if (nextPage < 0 || nextPage >= pages.length) return;
+    if (composerDirty && !window.confirm('Discard this unfinished reaction and turn the page?')) return;
+    closeComposer();
+    toolbar.hidden = true;
+    window.getSelection()?.removeAllRanges();
+    currentPage = nextPage;
+    renderLetter(offset < 0 ? 'previous' : 'next');
+    modal.querySelector('.letter-paper')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function buildReaction(record) {
@@ -310,12 +399,14 @@ export function openLetter(giftId) {
   }
 
   renderLetter();
-  setupMusic(modal, gift.letter?.music);
+  const cleanupMusicControls = setupMusic(modal, gift.letter?.music);
 
   toolbar.querySelector('button').addEventListener('pointerdown', (event) => event.preventDefault());
   toolbar.querySelector('button').addEventListener('click', openComposerForSelection);
   modal.querySelector('.reaction-save').addEventListener('click', saveReaction);
   modal.querySelector('.reaction-cancel').addEventListener('click', closeComposer);
+  previousPageButton.addEventListener('click', () => turnPage(-1));
+  nextPageButton.addEventListener('click', () => turnPage(1));
   input.addEventListener('input', () => { composerDirty = input.value.trim().length > 0; });
   colors.addEventListener('change', () => { composerDirty = true; });
   body.addEventListener('mouseup', () => evaluateSelection(true));
@@ -327,15 +418,52 @@ export function openLetter(giftId) {
   modal.querySelector('.modal-body').addEventListener('scroll', hideSelectionToolbar, { passive: true });
 
   function cleanup() {
+    closeSenderViewer?.(false);
     clearTimeout(selectionTimer);
     clearTimeout(showStatus.timer);
     document.removeEventListener('selectionchange', handleSelectionChange);
     document.removeEventListener('keydown', handleReaderKey, true);
+    cleanupMusicControls?.();
     stopLetterMusic();
     if (activeCleanup === cleanup) activeCleanup = null;
   }
   activeCleanup = cleanup;
   return true;
+}
+
+/** Split paragraphs at word boundaries while preserving canonical IDs and offsets. */
+function paginateLetterBlocks(blocks, wordsPerPage) {
+  const pages = [[]];
+  let wordsOnPage = 0;
+
+  blocks.forEach((block) => {
+    const text = String(block?.text ?? '');
+    const words = [...text.matchAll(/\S+/g)];
+    if (!words.length) return;
+    let wordIndex = 0;
+
+    while (wordIndex < words.length) {
+      if (wordsOnPage >= wordsPerPage) {
+        pages.push([]);
+        wordsOnPage = 0;
+      }
+      const take = Math.min(wordsPerPage - wordsOnPage, words.length - wordIndex);
+      const startOffset = words[wordIndex].index;
+      const finalWord = words[wordIndex + take - 1];
+      const isFinalSegment = wordIndex + take === words.length;
+      const endOffset = isFinalSegment ? text.length : finalWord.index + finalWord[0].length;
+      pages.at(-1).push({
+        id: block.id,
+        text: text.slice(startOffset, endOffset),
+        startOffset,
+        endOffset,
+      });
+      wordIndex += take;
+      wordsOnPage += take;
+    }
+  });
+
+  return pages.filter((page) => page.length) || [[]];
 }
 
 function appendHighlightedText(paragraph, text, records) {
@@ -378,8 +506,9 @@ function setupMusic(modal, source) {
     mute.disabled = true;
     volume.disabled = true;
     status.textContent = 'No song for this letter';
-    return;
+    return null;
   }
+  setMuted(false);
 
   const sync = () => {
     const playing = !audio.paused;
@@ -407,5 +536,7 @@ function setupMusic(modal, source) {
     setVolume(Number(volume.value));
     sync();
   });
+  const unsubscribe = onStateChange(sync);
   sync();
+  return unsubscribe;
 }

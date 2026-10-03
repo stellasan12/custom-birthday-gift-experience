@@ -18,12 +18,16 @@ import {
   isGiftViewed,
   markGiftViewed,
   isAllUnlocked,
+  getAwakenedStickerIds,
+  markStickerAwakened,
 } from './storage.js';
-import { toggleMute, getMuted, toggleStickerMusic } from './audio.js';
+import { getMuted, setMuted, toggleStickerMusic } from './audio.js';
 import { openLetter } from './letter-reader.js';
 import { openSettings } from './settings.js';
+import { playSoundEffect } from './sound-effects.js';
 
-const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
+const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+const awakenedStickerIds = new Set();
 
 /**
  * Render and attach event handlers for the Explore Room inside #app
@@ -36,6 +40,8 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
   const allUnlocked = isAllUnlocked(configuredGiftIds);
   const revealed = isGiftsRevealed();
   const stickers = siteData.stickers || [];
+  awakenedStickerIds.clear();
+  getAwakenedStickerIds().forEach((id) => awakenedStickerIds.add(id));
 
   container.innerHTML = `
     <div class="explore-wrapper fade-in">
@@ -43,20 +49,20 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
       <header class="explore-header card-glass">
         <div class="header-left">
           <button id="nav-home-btn" class="nav-brand-btn" aria-label="Return to Homepage">
-            <span class="nav-logo-icon">🏠</span>
+            <img class="nav-site-character" src="${escapeHTML(siteData.homepage?.characterImage || '/images/placeholders/birthday-character.svg')}" alt="" onerror="this.src='/images/placeholders/birthday-character.svg'">
             <span class="nav-title font-heading">${escapeHTML(siteData.celebrant.name)}</span>
           </button>
         </div>
 
         <nav class="header-nav" aria-label="Explore Navigation">
-          <button id="nav-gallery-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="Gallery${allUnlocked ? '' : '. Secret! Access all gifts first!'}" ${allUnlocked ? '' : 'data-tooltip="Secret! Access all gifts first!"'}>
+          <button id="nav-gallery-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="${allUnlocked ? 'Gallery' : 'Secret destination. Access all gifts first'}" ${allUnlocked ? '' : 'data-tooltip="Secret! Access all gifts first!"'}>
             <span class="nav-icon">${allUnlocked ? '🖼️' : '🔒'}</span>
-            <span class="nav-label">Gallery</span>
+            <span class="nav-label">${allUnlocked ? 'Gallery' : 'Secret'}</span>
           </button>
 
-          <button id="nav-letters-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="Letters${allUnlocked ? '' : '. Secret nganiiiii! Access all gifts first'}" ${allUnlocked ? '' : 'data-tooltip="Secret nganiiiii! Access all gifts first"'}>
+          <button id="nav-letters-btn" class="nav-link-btn ${allUnlocked ? 'unlocked' : 'locked'}" aria-label="${allUnlocked ? 'Letters' : 'Secret destination. Access all gifts first'}" ${allUnlocked ? '' : 'data-tooltip="Secret! Access all gifts first"'}>
             <span class="nav-icon">${allUnlocked ? '💌' : '🔒'}</span>
-            <span class="nav-label">Letters</span>
+            <span class="nav-label">${allUnlocked ? 'Letters' : 'Secret'}</span>
           </button>
 
           <button id="nav-settings-btn" class="nav-link-btn" aria-label="Settings">
@@ -79,6 +85,13 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
 
         <!-- ROOM STAGE: Cozy bedroom background with wall poster & floor baseline -->
         <div class="room-stage card-glass">
+          <div class="room-background" aria-hidden="true">
+            <div class="room-window"><span></span><span></span></div>
+            <div class="room-shelf"><i></i><i></i><i></i></div>
+            <div class="room-bed"><span></span></div>
+            <div class="room-rug"></div>
+            <div class="room-baseboard"></div>
+          </div>
           <div class="room-wall-poster">
             ${stickers.filter((sticker) => getStickerPosition(sticker) === 'top-right').map(renderStickerHTML).join('')}
           </div>
@@ -98,7 +111,7 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
 
             <!-- CENTERPIECE: CLICK ME PENGUIN -->
             <section id="click-me-section" class="click-me-section room-floor-item item-penguin ${revealed ? 'is-revealed' : ''}">
-              <button id="click-me-btn" class="click-me-btn" aria-label="Click me to reveal your birthday gifts">
+              <button id="click-me-btn" class="click-me-btn" aria-label="${revealed ? 'Hide birthday gifts' : 'Show birthday gifts'}" aria-expanded="${revealed}">
                 <div class="click-me-box">
                   <img src="/images/stickers/holding-gift.png" alt="Gift Box" class="click-me-img" />
                   <div class="click-me-badge font-heading">${siteData.explore.clickMePrompt}</div>
@@ -130,6 +143,10 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
           </div>
         </section>
       </main>
+      <footer class="explore-footer">
+        <span>A little birthday corner from your</span>
+        <strong>SPIRITUAL FAM, Inc. ♡</strong>
+      </footer>
     </div>
   `;
 
@@ -140,13 +157,6 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
   // Home navigation
   document.getElementById('nav-home-btn')?.addEventListener('click', () => {
     if (onGoHome) onGoHome();
-  });
-
-  // Audio Toggle
-  const audioBtn = document.getElementById('audio-toggle-room');
-  audioBtn?.addEventListener('click', () => {
-    const isNowMuted = toggleMute();
-    audioBtn.textContent = isNowMuted ? '🔇' : '🔊';
   });
 
   // Navigation: Gallery
@@ -177,20 +187,22 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
   stickers.forEach((sticker) => {
     const el = document.getElementById(`sticker-${sticker.id}`);
     if (!el) return;
+    let attempts = awakenedStickerIds.has(sticker.id) ? 3 : 0;
 
     el.addEventListener('click', () => {
-      if (sticker.type === 'petals') {
-        showerPetals({ count: 40, duration: 4500 });
-        showToast('Flower magic activated! 🌸✨');
-      } else if (sticker.type === 'video') {
-        openVideoModal(sticker);
-      } else if (sticker.type === 'music') {
-        const playing = toggleStickerMusic(sticker.music || sticker.media);
-        audioBtn.textContent = getMuted() ? '🔇' : '🔊';
-        showToast(playing ? 'Sticker music playing 🎵' : 'Background music restored 🎵');
-      } else if (sticker.type === 'custom') {
-        showToast('A special little keepsake 📦');
+      attempts += 1;
+      if (attempts < 3) {
+        showToast('3 times is the magic');
+        return;
       }
+      if (attempts === 3) {
+        awakenedStickerIds.add(sticker.id);
+        markStickerAwakened(sticker.id);
+        el.classList.remove('is-dormant');
+        el.classList.add('is-awake');
+        playSoundEffect('unlock');
+      } else playSoundEffect('click');
+      activateSticker(sticker);
     });
   });
 
@@ -200,7 +212,15 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
   const carouselSection = document.getElementById('carousel-section');
 
   clickMeBtn?.addEventListener('click', () => {
-    if (!clickMeSection.classList.contains('is-revealed')) {
+    const currentlyVisible = !carouselSection.classList.contains('is-hidden');
+    if (currentlyVisible) {
+      setGiftsRevealed(false);
+      clickMeSection.classList.remove('is-revealed');
+      carouselSection.classList.remove('is-visible', 'slide-in-up');
+      carouselSection.classList.add('is-hidden');
+      clickMeBtn.setAttribute('aria-expanded', 'false');
+      clickMeBtn.setAttribute('aria-label', 'Show birthday gifts');
+    } else {
       setGiftsRevealed(true);
       // Execute satisfying reveal sequence
       clickMeBtn.classList.add('shake-wiggle');
@@ -210,6 +230,8 @@ export function renderExploreRoom(container, onGoHome, onOpenGallery, onOpenLett
         clickMeSection.classList.add('is-revealed');
         carouselSection.classList.remove('is-hidden');
         carouselSection.classList.add('is-visible', 'slide-in-up');
+        clickMeBtn.setAttribute('aria-expanded', 'true');
+        clickMeBtn.setAttribute('aria-label', 'Hide birthday gifts');
       }, 500);
     }
   });
@@ -258,7 +280,7 @@ function renderStickerHTML(sticker) {
     return `
       <button
         id="sticker-${sticker.id}"
-        class="sticker-btn sticker-placeholder-box"
+        class="sticker-btn sticker-placeholder-box ${awakenedStickerIds.has(sticker.id) ? 'is-awake' : 'is-dormant'}"
         title="${escapeHTML(sticker.tooltip || 'Add Object Later')}"
         aria-label="Object Placeholder Box"
       >
@@ -273,7 +295,7 @@ function renderStickerHTML(sticker) {
   return `
     <button
       id="sticker-${sticker.id}"
-      class="sticker-btn sticker-${sticker.id}"
+      class="sticker-btn sticker-${sticker.id} ${awakenedStickerIds.has(sticker.id) ? 'is-awake' : 'is-dormant'}"
       title="${escapeHTML(sticker.tooltip || sticker.label)}"
       aria-label="${escapeHTML(sticker.tooltip || sticker.label)}"
     >
@@ -309,7 +331,28 @@ function renderGiftCharacterHTML(gift) {
   `;
 }
 
+function activateSticker(sticker) {
+  if (sticker.type === 'petals') {
+    const gardenStyle = sticker.petalStyle === 'garden'
+      || sticker.id === 'custom-object'
+      || sticker.label?.trim().toLowerCase() === 'ezer';
+    showerPetals({ count: gardenStyle ? 30 : 40, duration: 4500, style: gardenStyle ? 'garden' : 'classic' });
+    showToast(gardenStyle ? 'A little garden is blooming! 🌼✨' : 'Flower magic activated! 🌸✨');
+  } else if (sticker.type === 'video') {
+    openVideoModal(sticker);
+  } else if (sticker.type === 'music') {
+    // The poster itself behaves as a sound toggle: play audibly, then stop and mute.
+    if (getMuted()) setMuted(false);
+    const playing = toggleStickerMusic(sticker.music || sticker.media);
+    if (!playing) setMuted(true);
+    showToast(playing ? 'Sticker music playing 🎵' : 'Stick music stopped 🎵');
+  } else {
+    showToast('A special little keepsake 📦');
+  }
+}
+
 function triggerLockedFeedback(element, message) {
+  playSoundEffect('locked');
   element.classList.remove('shake-wiggle');
   // Trigger reflow to restart animation
   void element.offsetWidth;
@@ -340,6 +383,7 @@ function openVideoModal(sticker) {
   const modal = openModal({
     title: `${sticker.label}`,
     isVideo: true,
+    modalClass: sticker.label?.toLowerCase().includes('mingyu') ? 'mingyu-video-modal' : 'sticker-video-modal',
     bodyHTML: `
       <div class="video-modal-content">
         <video controls autoplay playsinline class="modal-video-element">

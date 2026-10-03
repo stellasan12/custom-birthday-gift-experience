@@ -5,8 +5,21 @@
 
 /* ── Small phones (≤ 480px) ── */
 @media (max-width: 480px) {
-  .room-sticker-top-left { top:18px;left:18px; }
-  .room-sticker-top-left .sticker-img { width:72px; }
+  .explore-room {
+    padding: 10px 8px 18px;
+    justify-content: flex-start;
+  }
+
+  .room-stage {
+    min-height: 340px;
+    padding: 82px 4px 74px;
+    overflow: hidden;
+  }
+
+  .room-sticker-top-left { top: 16px; left: 12px; }
+  .room-sticker-top-left .sticker-img { width: 62px; height: auto; }
+  .room-wall-poster { top: 20px; right: 16px; }
+  .room-wall-poster .sticker-img { width: 72px; height: auto; }
   .homepage {
     padding: var(--space-md) var(--space-sm);
   }
@@ -46,16 +59,35 @@
     font-size: 0.75rem;
   }
 
-  .room-window{left:12%;width:90px;height:85px;border-width:6px}.room-window span{display:none}.room-shelf{display:none}.room-bed{right:2%;width:125px;height:68px;opacity:.75}.room-rug{right:8%;left:8%}
+  .room-window { top: 22px; left: 31%; width: 76px; height: 70px; border-width: 5px; }
+  .room-window span { display: none; }
+  .room-shelf { display: none; }
+  .room-bed { right: -8px; bottom: 25%; width: 112px; height: 62px; opacity: .72; }
+  .room-rug { right: 4%; bottom: 1%; left: 4%; height: 48px; }
+  .room-baseboard { bottom: 24.5%; }
+
+  .room-floor-row {
+    justify-content: center;
+    align-items: flex-end;
+    min-width: 0;
+    transform: translateY(8px);
+  }
+
+  .room-floor-item { min-width: 0; }
+  .item-flower { margin-right: -38px; }
+  .item-flower .sticker-img { width: 70px; height: auto; margin-bottom: -20px; }
+  .item-custom-object { margin-right: -38px; }
+  .item-custom-object .sticker-img { width: 98px; height: auto; margin-right: -8px; margin-bottom: 0; }
+  .click-me-img { width: 126px; height: auto; margin-bottom: -20px; }
+  .click-me-badge { bottom: -30px; padding: 6px 12px; font-size: .76rem; white-space: nowrap; }
+  .item-standee { margin-left: -30px; }
+  .item-standee .sticker-img { width: 82px; height: auto; margin-bottom: -7px; }
 
   .room-main-row {
     gap: 12px;
   }
 
-  .sticker-img {
-    width: 55px;
-    height: 55px;
-  }
+  .sticker-img { height: auto; max-width: 100%; }
 
   .carousel-track {
     padding: 12px 20px;

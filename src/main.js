@@ -15,6 +15,7 @@ import { initApp } from './js/app.js';
 import { applySettings } from './js/settings.js';
 import { loadSiteContent } from './js/site-content.js';
 import { setupGlobalButtonSounds } from './js/sound-effects.js';
+import { requireBirthdayPin } from './js/login.js';
 
 // Apply persisted palette and reading scale before the application renders.
 applySettings();
@@ -22,6 +23,8 @@ setupGlobalButtonSounds();
 
 async function boot() {
   const app = document.getElementById('app');
+  if (!app) return;
+  await requireBirthdayPin(app);
   if (app) app.innerHTML = '<div class="site-loading" role="status"><span>💌</span><p>Opening your birthday surprise...</p></div>';
   await loadSiteContent();
   initApp();

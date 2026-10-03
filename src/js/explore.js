@@ -335,7 +335,7 @@ function activateSticker(sticker) {
   if (sticker.type === 'petals') {
     const gardenStyle = sticker.petalStyle === 'garden'
       || sticker.id === 'custom-object'
-      || sticker.label?.trim().toLowerCase() === 'ezer';
+      || sticker.label?.trim().toLowerCase() === 'flower pot';
     showerPetals({ count: gardenStyle ? 30 : 40, duration: 4500, style: gardenStyle ? 'garden' : 'classic' });
     showToast(gardenStyle ? 'A little garden is blooming! 🌼✨' : 'Flower magic activated! 🌸✨');
   } else if (sticker.type === 'video') {

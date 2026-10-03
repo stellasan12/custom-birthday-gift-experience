@@ -10,7 +10,7 @@ const STORAGE_KEY = 'birthdayGiftExperience';
 export const DEFAULT_SETTINGS = Object.freeze({
   theme: 'birthday',
   fontSize: 'normal',
-  volume: 0.3,
+  volume: 0.5,
   muted: false,
 });
 

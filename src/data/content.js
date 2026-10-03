@@ -46,7 +46,7 @@ export const siteData = {
    */
   audio: {
     globalBackgroundMusic: "/audio/background/general-bgm.mp3",
-    defaultVolume: 0.3,
+    defaultVolume: 0.5,
   },
 
   /** MEMORY GALLERY — both Gallery and Social views render this same data. */
@@ -238,7 +238,7 @@ export const siteData = {
     {
       id: "custom-object",
       type: "petals",
-      label: "Ezer",
+      label: "Flower Pot",
       image: "/images/stickers/flower-pot.png",
       petalStyle: "garden",
       //tooltip: "Click for petal shower magic! (can you do a different flower petal??)",

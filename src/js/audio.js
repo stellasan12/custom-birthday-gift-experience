@@ -100,6 +100,14 @@ export function initAudio() {
   document.addEventListener('keydown', interactionHandler, { capture: true, passive: true });
   document.addEventListener('touchstart', interactionHandler, { capture: true, passive: true });
 
+  // Poster music is secondary ambience and must never overlap a video.
+  // The capture listener covers the intro, sticker videos, and Gallery reels.
+  document.addEventListener('play', (event) => {
+    if (event.target instanceof HTMLVideoElement && isStickerMusicPlaying()) {
+      stopStickerMusic({ restoreGlobal: false });
+    }
+  }, true);
+
   // A double-click always returns secondary sticker audio to the original BGM.
   document.addEventListener('dblclick', (event) => {
     if (!hasUserInteracted) {
@@ -218,6 +226,8 @@ function clearFade() {
  * Music will start on first user interaction.
  */
 export function playGlobalMusic() {
+  // Starting the site's main BGM always takes priority over poster music.
+  if (isStickerMusicPlaying()) stopStickerMusic({ restoreGlobal: false });
   bgmRequested = true;
   if (hasUserInteracted && !isMuted) {
     fadeIn();

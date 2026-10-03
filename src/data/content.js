@@ -222,7 +222,7 @@ export const siteData = {
     {
       id: "standee",
       type: "video",
-      label: "Seventeen Mingyu",
+      label: "Seventeen",
       image: "/images/stickers/standee.png",
       video: "/videos/sticker-mingyu.mp4",
       //tooltip: "Click to watch special message video!",
